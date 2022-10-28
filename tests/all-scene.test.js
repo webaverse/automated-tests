@@ -6,7 +6,7 @@ const {
   totalTimeout,
   getCurrentPage,
 } = require('../utils/utils');
-const sceneUrls = require('../../../scenes/scenes.json');
+const sceneUrls = require('../../scenes/scenes.json');
 const request = require('request');
 
 describe('should switch scene works', () => {
@@ -17,7 +17,7 @@ describe('should switch scene works', () => {
     // await page.evaluate(async () => {
     // 	window.todo = () => {}
     // })
-    await enterScene(`https://local.webaverse.com:3000/`);
+    await enterScene(`https://local.webaverse.com/`);
   }, totalTimeout);
 
   afterAll(async () => {
@@ -28,17 +28,15 @@ describe('should switch scene works', () => {
     'should scene switch works %s',
     async sceneUrl => {
       printLog('should profile ui view works: ', sceneUrl);
+
       const page = getCurrentPage();
-      await page.waitForSelector('._button_1dy9r_25', {
-        visible: true,
-        timeout: totalTimeout,
-      });
-      await page.evaluate(async () => {
-        document.querySelector('._button_1dy9r_25').click();
-      });
+      await page.evaluate(async (sceneUrl) => {
+        document.querySelector('._button_1fev9_13').click();
+        console.log(`======================= ${sceneUrl} =======================`)
+      }, sceneUrl);
 
       const mousePos = await page.evaluate(async sceneUrl => {
-        const nodeLists = document.querySelectorAll('div._room_1dy9r_43');
+        const nodeLists = document.querySelectorAll('div._room_1fev9_22');
         let mouseX, mouseY;
         nodeLists.forEach(nodeElement => {
           const url = nodeElement.querySelector('div').innerHTML;
@@ -70,29 +68,14 @@ describe('should switch scene works', () => {
         isPageError = true;
       });
 
-      const appCount = await new Promise(function (resolve, reject) {
-        request(
-          `https://local.webaverse.com:3000/scenes/${sceneUrl}`,
-          function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-              var importedJSON = JSON.parse(body);
-              console.log(importedJSON);
-              resolve(importedJSON.objects ? importedJSON.objects.length : 0);
-            } else {
-              reject(0);
-            }
-          },
-        );
-      });
-
       const result = await page.evaluate(async () => {
         // @ts-ignore
         try {
           await window.globalWebaverse.webaverse?.waitForLoad();
           await window.globalWebaverse.universe?.waitForSceneLoaded();
-          const loadedAppCount =
+          const loadedApps =
             window.globalWebaverse.world.appManager.getApps();
-
+          const loadedAppCount = loadedApps.length
           //add some validation code here
           return {
             isSceneLoaded: true,
@@ -106,10 +89,32 @@ describe('should switch scene works', () => {
           };
         }
       });
+
+      const appCount = await new Promise(function (resolve, reject) {
+        request(
+          `https://webaverse.github.io/scenes/${sceneUrl}`,
+          function (error, response, body) {
+            try {
+              if (!error && response.statusCode == 200) {
+                var importedJSON = JSON.parse(body);
+                resolve(importedJSON.objects ? importedJSON.objects.length : 0);
+              } else {
+                reject(0);
+              }
+            } catch (error) {
+              reject(0);
+            }
+          },
+        );
+      });
+
+      console.log("appCount=======================", appCount)
+      console.log("result=======================", result.isSceneLoaded, result.loadedAppCount)
+      console.log("isPageError=======================", isPageError)
       expect(result.isSceneLoaded).toBeTruthy();
       expect(result.loadedAppCount).toBeGreaterThanOrEqual(appCount);
       expect(!isPageError).toBeTruthy();
     },
-    totalTimeout,
+    totalTimeout * 10,
   );
 });
