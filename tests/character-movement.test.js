@@ -3,6 +3,7 @@ const {
   enterScene,
   closeBrowser,
   printLog,
+  displayLog,
   totalTimeout,
   getCurrentPage,
 } = require('../utils/utils');
@@ -17,7 +18,7 @@ describe(
       // 	window.todo = () => {}
       // })
       await enterScene(
-        `https://local.webaverse.com/?src=./packages/puppeteer-previewer/scenes/test-e2e-empty.scn`,
+        `https://local.webaverse.com/?src=./packages/automated-tests/scenes/test-e2e-empty.scn`,
       );
     }, totalTimeout);
 
@@ -28,7 +29,7 @@ describe(
     test(
       'should character loaded',
       async () => {
-        printLog('should character loaded');
+        displayLog('section', 'should character loaded: start');
         const avatarFlag = await getCurrentPage().evaluate(async () => {
           const localPlayer = globalWebaverse.playersManager.localPlayer;
           const isPlayerAvatarApp = !!localPlayer.getAvatarApp();
@@ -61,14 +62,24 @@ describe(
             isCharacterPhysic,
           };
         });
-        expect(avatarFlag.isPlayerAvatarApp).toBeTruthy();
-        expect(avatarFlag.isBound).toBeTruthy();
-        expect(avatarFlag.isCharacterSfx).toBeTruthy();
-        expect(avatarFlag.isCharacterHups).toBeTruthy();
-        expect(avatarFlag.isCharacterFx).toBeTruthy();
-        expect(avatarFlag.isCharacterHitter).toBeTruthy();
-        expect(avatarFlag.isCharacterFace).toBeTruthy();
-        expect(avatarFlag.isCharacterPhysic).toBeTruthy();
+        displayLog('step', 'should character loaded: ', 'Validation checking')
+
+        displayLog(avatarFlag.isPlayerAvatarApp? 'success' : 'error', 'Should character loaded', 'isPlayerAvatarApp');
+        displayLog(avatarFlag.isBound? 'success' : 'error', 'Should character loaded', 'isBound');
+        displayLog(avatarFlag.isCharacterSfx? 'success' : 'error', 'Should character loaded', 'isCharacterSfx');
+        displayLog(avatarFlag.isCharacterHups? 'success' : 'error', 'Should character loaded', 'isCharacterHups');
+        displayLog(avatarFlag.isCharacterFx? 'success' : 'error', 'Should character loaded', 'isCharacterFx');
+        displayLog(avatarFlag.isCharacterHitter? 'success' : 'error', 'Should character loaded', 'isCharacterHitter');
+        displayLog(avatarFlag.isCharacterFace? 'success' : 'error', 'Should character loaded', 'isCharacterFace');
+        displayLog(avatarFlag.isCharacterPhysic? 'success' : 'error', 'Should character loaded', 'isCharacterPhysic');
+
+        const isSuccess = avatarFlag.isPlayerAvatarApp && avatarFlag.isBound
+                          && avatarFlag.isCharacterSfx && avatarFlag.isCharacterHups
+                          && avatarFlag.isCharacterFx && avatarFlag.isCharacterHitter
+                          && avatarFlag.isCharacterFace && avatarFlag.isCharacterPhysic
+
+        displayLog(isSuccess ? 'passed' : 'fail', 'should character loaded: ', 'avatar');
+        expect(isSuccess).toBeTruthy();
       },
       totalTimeout,
     );
@@ -76,11 +87,13 @@ describe(
     test(
       'should character movement: walk',
       async () => {
-        printLog('should character movement: walk');
+        displayLog('section', 'should character movement: ', 'walk');
         const page = getCurrentPage();
         const firstPosition = await page.evaluate(async () => {
           return globalWebaverse.playersManager.localPlayer.position;
         });
+
+        displayLog('step', 'should character movement: ', 'moving');
         const keys = ['KeyW', 'KeyA', 'KeyS', 'KeyD'];
         const key = keys[Math.floor(Math.random() * keys.length)];
         await page.keyboard.down(key);
@@ -112,10 +125,17 @@ describe(
         );
         await page.keyboard.up(key);
         await page.waitForTimeout(3000);
-        expect(playerMove.currentSpeed).toBeGreaterThan(0);
-        expect(playerMove.idleWalkFactor).toBeGreaterThan(0.5);
-        expect(playerMove.currentPosition).not.toBe(firstPosition);
+
+        displayLog('step', 'should character movement: ', 'validation');
+
+        displayLog(playerMove.currentSpeed > 0? 'success' : 'error', 'should character movement: ', 'currentSpeed > 0');
+        displayLog(playerMove.idleWalkFactor > 0.5? 'success' : 'error', 'should character movement: ', 'idleWalkFactor > 0.5');
+        displayLog(playerMove.currentPosition !== firstPosition? 'success' : 'error', 'should character movement: ', 'moved');
+        
+        const isSuccess = playerMove.currentSpeed > 0 && playerMove.idleWalkFactor > 0.5 && playerMove.currentPosition !== firstPosition
         // expect(playerMove.isCorrectMove).toBeTruthy();
+        displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'walk');
+        expect(isSuccess).toBeTruthy();
       },
       totalTimeout,
     );
@@ -123,11 +143,13 @@ describe(
     test(
       'should character movement: run',
       async () => {
-        printLog('should character movement: run');
+        displayLog('section', 'should character movement: ', 'run');
         const page = getCurrentPage();
         const lastPosition = await page.evaluate(async () => {
           return globalWebaverse.playersManager.localPlayer.position;
         });
+
+        displayLog('step', 'should character movement: ', 'running');
         const keys = ['KeyW', 'KeyA', 'KeyS', 'KeyD'];
         const key = keys[Math.floor(Math.random() * keys.length)];
         await page.keyboard.down('ShiftRight');
@@ -148,9 +170,15 @@ describe(
         await page.keyboard.up(key);
         await page.keyboard.up('ShiftRight');
         await page.waitForTimeout(3000);
-        expect(playerRun.currentSpeed).toBeGreaterThan(0.5);
-        expect(playerRun.walkRunFactor).toBeGreaterThan(0.5);
-        expect(playerRun.currentPosition).not.toBe(lastPosition);
+        
+        displayLog('step', 'should character movement: ', 'validation');
+        displayLog(playerRun.currentSpeed > 0.5? 'success' : 'error', 'should character movement: ', 'currentSpeed > 0.5');
+        displayLog(playerRun.walkRunFactor > 0.5? 'success' : 'error', 'should character movement: ', 'walkRunFactor > 0.5');
+        displayLog(playerRun.currentPosition !== lastPosition? 'success' : 'error', 'should character movement: ', 'moved');
+        
+        const isSuccess = playerRun.currentSpeed > 0.5 && playerRun.walkRunFactor > 0.5 && playerRun.currentPosition !== lastPosition
+        displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'run');
+        expect(isSuccess).toBeTruthy();
       },
       totalTimeout,
     );
@@ -158,7 +186,8 @@ describe(
     test(
       'should character movement: naruto run',
       async () => {
-        printLog('should character movement: naruto run');
+        displayLog('section', 'should character movement: ', 'naruto run');
+        displayLog('step', 'should character movement: ', 'naruto run start');
         const page = getCurrentPage();
         await page.keyboard.down('ShiftLeft');
         await page.waitForTimeout(100);
@@ -176,8 +205,15 @@ describe(
         });
         await page.keyboard.up('ShiftLeft');
         await page.waitForTimeout(5000);
-        expect(narutoRun.narutoRunTime).toBeGreaterThan(0.5);
-        expect(narutoRun.narutoRunState).toBeTruthy();
+
+        displayLog('step', 'should character movement: ', 'validation');
+        displayLog(narutoRun.narutoRunTime > 0.5? 'success' : 'error', 'should character movement: ', 'narutoRunTime > 0.5');
+        displayLog(narutoRun.narutoRunState? 'success' : 'error', 'should character movement: ', 'narutoRunState');
+ 
+        const isSuccess = narutoRun.narutoRunTime > 0.5 && narutoRun.narutoRunState
+        // expect(playerMove.isCorrectMove).toBeTruthy();
+        displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'naruto run');
+        expect(isSuccess).toBeTruthy();
       },
       totalTimeout,
     );
@@ -185,7 +221,8 @@ describe(
     test(
       'should character movement: jump',
       async () => {
-        printLog('should character movement: jump');
+        displayLog('section', 'should character movement: ', 'jump');
+        displayLog('step', 'should character movement: ', 'jump start');
         const page = getCurrentPage();
         const lastPosition = await page.evaluate(async () => {
           return globalWebaverse.playersManager.localPlayer.position;
@@ -212,7 +249,11 @@ describe(
           await page.waitForTimeout(2000);
         }
         await page.waitForTimeout(3000);
-        expect(isJumpFlags[0] || isJumpFlags[1] || isJumpFlags[2]).toBeTruthy();
+
+        displayLog('step', 'should character movement: ', 'validation');
+        const isSuccess = isJumpFlags[0] || isJumpFlags[1] || isJumpFlags[2]
+        displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'jump');
+        expect(isSuccess).toBeTruthy();
       },
       totalTimeout,
     );
@@ -220,7 +261,8 @@ describe(
     test(
       'should character movement: double jump',
       async () => {
-        printLog('should character movement: double jump');
+        displayLog('section', 'should character movement: ', 'double jump');
+        displayLog('step', 'should character movement: ', 'double jump start');
         const page = getCurrentPage();
         const lastPosition = await page.evaluate(async () => {
           return globalWebaverse.playersManager.localPlayer.position;
@@ -248,9 +290,11 @@ describe(
           await page.waitForTimeout(5000);
         }
         await page.waitForTimeout(3000);
-        expect(
-          isDoubleJumpFlags[0] || isDoubleJumpFlags[1] || isDoubleJumpFlags[2],
-        ).toBeTruthy();
+
+        displayLog('step', 'should character movement: ', 'validation');
+        const isSuccess = isDoubleJumpFlags[0] || isDoubleJumpFlags[1] || isDoubleJumpFlags[2]
+        displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'double jump');
+        expect(isSuccess).toBeTruthy();
       },
       totalTimeout,
     );
@@ -258,11 +302,12 @@ describe(
     test(
       'should character movement: crouch',
       async () => {
-        printLog('should character movement: crouch');
+        displayLog('section', 'should character movement: ', 'crouch');
         const page = getCurrentPage();
         const lastPosition = await page.evaluate(async () => {
           return globalWebaverse.playersManager.localPlayer.position;
         });
+        displayLog('step', 'should character movement: ', 'crouch and move');
         await page.keyboard.down('ControlLeft');
         await page.keyboard.down('KeyC');
         await page.waitForTimeout(100);
@@ -289,9 +334,15 @@ describe(
         await page.keyboard.up('ControlLeft');
         await page.keyboard.up('KeyC');
         await page.waitForTimeout(3000);
-        expect(playerCrouch.currentSpeed).toBeGreaterThan(0);
-        expect(playerCrouch.crouchFactor).toBeGreaterThan(0);
-        expect(playerCrouch.currentPosition).not.toBe(lastPosition);
+
+        displayLog('step', 'should character movement: ', 'validation');
+        displayLog(playerCrouch.currentSpeed > 0? 'success' : 'error', 'should character movement: ', 'currentSpeed > 0');
+        displayLog(playerCrouch.crouchFactor > 0.5? 'success' : 'error', 'should character movement: ', 'crouchFactor > 0.5');
+        displayLog(playerCrouch.currentPosition !== lastPosition? 'success' : 'error', 'should character movement: ', 'moved');
+        
+        const isSuccess = playerCrouch.currentSpeed > 0 && playerCrouch.crouchFactor > 0.5 && playerCrouch.currentPosition !== lastPosition
+        displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'crouch');
+        expect(isSuccess).toBeTruthy();
       },
       totalTimeout,
     );
@@ -299,7 +350,7 @@ describe(
     test(
       'should character movement: fly',
       async () => {
-        printLog('should character movement: fly');
+        displayLog('section', 'should character movement: ', 'fly');
         const page = getCurrentPage();
         await page.keyboard.press('KeyF');
         await page.keyboard.down('KeyW');
@@ -316,8 +367,14 @@ describe(
         await page.keyboard.up('KeyW');
         await page.keyboard.press('KeyF');
         await page.waitForTimeout(3000);
-        expect(playerFly.flyTime).toBeGreaterThan(0);
-        expect(playerFly.flyState).toBeTruthy();
+
+        displayLog('step', 'should character movement: ', 'validation');
+        displayLog(playerFly.flyTime > 0? 'success' : 'error', 'should character movement: ', 'flyTime > 0');
+        displayLog(playerFly.flyState? 'success' : 'error', 'should character movement: ', 'flyState');
+ 
+        const isSuccess = playerFly.flyTime > 0.5 && playerFly.flyState
+        displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'fly');
+        expect(isSuccess).toBeTruthy();
       },
       totalTimeout,
     );
@@ -325,7 +382,7 @@ describe(
     test(
       'should character movement: dance',
       async () => {
-        printLog('should character movement: dance');
+        displayLog('section', 'should character movement: ', 'dance');
         const page = getCurrentPage();
         await page.keyboard.down('KeyV');
         await page.waitForTimeout(2000);
@@ -339,6 +396,13 @@ describe(
         await page.keyboard.up('KeyV');
         await page.waitForTimeout(3000);
         expect(playerDance.danceFactor).toBeTruthy();
+
+        displayLog('step', 'should character movement: ', 'validation');
+        displayLog(playerDance.danceFactor? 'success' : 'error', 'should character movement: ', 'dance');
+ 
+        const isSuccess = playerDance.danceFactor
+        displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'dance');
+        expect(isSuccess).toBeTruthy();
       },
       totalTimeout,
     );

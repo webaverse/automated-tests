@@ -37,14 +37,6 @@
         "voice": "Shining Armor",
         "bio": "His nickname is DRK. 15/M hacker. Loves guns. Likes plotting new hacks. He has the best equipment and is always ready for a fight."
       }
-    },
-    {
-      "position": [2, 0.5, 2],
-      "start_url": "https://webaverse.github.io/silsword/"
-    },
-    {
-      "position": [2, 0.5, 6],
-      "start_url": "https://webaverse.github.io/silsword/"
     }
   ]
 }

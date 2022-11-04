@@ -2,7 +2,7 @@ const {
     launchBrowser,
     enterScene,
     closeBrowser,
-    printLog,
+    displayLog,
     totalTimeout,
     getCurrentPage,
   } = require('../utils/utils');
@@ -15,7 +15,7 @@ const {
         // 	window.todo = () => {}
         // })
         await enterScene(
-            `https://local.webaverse.com/?src=./packages/puppeteer-previewer/scenes/test-e2e-vehicle.scn`,
+            `https://local.webaverse.com/?src=./packages/automated-tests/scenes/test-e2e-vehicle.scn`,
         );
         const page = getCurrentPage();
         await page.click('#root');
@@ -30,10 +30,10 @@ const {
     test(
       'should ride vehicle: hovercraft',
       async () => {
-        printLog('should ride vehicle:: hovercraft');
+        displayLog('section', 'should ride vehicle: ', 'hovercraft');
         const page = getCurrentPage();
         //move to sword position and rotate
-        printLog('should ride vehicle: move to hovercraft position');
+        displayLog('step', 'should ride vehicle: ', 'move to hovercraft position');
         await page.evaluate(async () => {
             globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
             {x: 2, y: 1.5, z: -12},
@@ -42,7 +42,7 @@ const {
         await page.waitForTimeout(2000);
 
         //ride the hovercraft
-        printLog('should ride vehicle: ride the hovercraft');
+        displayLog('step', 'should ride vehicle: ', 'ride the hovercraft');
         await page.keyboard.down('KeyE');
         await page.waitForTimeout(4000);
         await page.keyboard.up('KeyE');
@@ -73,7 +73,7 @@ const {
 
         const firstPosition = vehicleInfo.position
         const isVehicleRided = vehicleInfo.isVehicleRided
-
+        displayLog('step', 'should ride vehicle: ', 'drive the hovercraft');
         const keys = ['KeyW', 'KeyA', 'KeyS', 'KeyD'];
         const key = keys[Math.floor(Math.random() * keys.length)];
         await page.keyboard.down(key);
@@ -113,7 +113,7 @@ const {
         await page.waitForTimeout(1000);
 
         //unride the hovercraft
-        printLog('should ride vehicle: unride the hovercraft');
+        displayLog('step', 'should ride vehicle: ', 'unride the hovercraft');
         await page.keyboard.press('KeyR');
         await page.evaluate(async () => {
             globalWebaverse.game.dropSelectedApp();
@@ -132,7 +132,7 @@ const {
         });
         await page.waitForTimeout(1000);
 
-        printLog('should ride vehicle: move to zero position');
+        displayLog('step', 'should ride vehicle: ', 'move to zero position');
         await page.evaluate(async () => {
             globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
             {x: 0, y: 1.5, z: 0},
@@ -140,10 +140,14 @@ const {
         });
         await page.waitForTimeout(2000);
 
-        expect(isVehicleRided).toBeTruthy();
-        expect(vehicleMove.currentPosition).not.toBe(firstPosition);
-        // expect(vehicleMove.isCorrectMove).toBeTruthy();
-        expect(isVehicleUnRided).toBeTruthy();
+        displayLog('step', 'should ride vehicle: ', 'validation');
+        displayLog(isVehicleRided? 'success' : 'error', 'should ride vehicle: ', 'isVehicleRided');
+        displayLog(vehicleMove.currentPosition !== firstPosition? 'success' : 'error', 'should ride vehicle: ', 'moved');
+        displayLog(isVehicleUnRided? 'success' : 'error', 'should ride vehicle: ', 'isVehicleUnRided');
+
+        const isSuccess = isVehicleRided && vehicleMove.currentPosition !== firstPosition && isVehicleUnRided
+        displayLog(isSuccess ? 'passed' : 'fail', 'should ride vehicle: ', 'hovercraft');
+        expect(isSuccess).toBeTruthy();
       },
       totalTimeout,
     );
@@ -151,10 +155,10 @@ const {
     test(
         'should ride vehicle: dragon',
         async () => {
-            printLog('should ride vehicle:: dragon');
+            displayLog('section', 'should ride vehicle: ', 'dragon');
             const page = getCurrentPage();
             //move to sword position and rotate
-            printLog('should ride vehicle: move to dragon position');
+            displayLog('step', 'should ride vehicle: ', 'move to dragon position');
             await page.evaluate(async () => {
                 globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
                 {x: 2, y: 1.5, z: 12},
@@ -163,7 +167,7 @@ const {
             await page.waitForTimeout(2000);
 
             //ride the dragon
-            printLog('should ride vehicle: ride the dragon');
+            displayLog('step', 'should ride vehicle: ', 'ride the dragon');
             await page.keyboard.down('KeyE');
             await page.waitForTimeout(4000);
             await page.keyboard.up('KeyE');
@@ -195,6 +199,7 @@ const {
             const firstPosition = vehicleInfo.position
             const isVehicleRided = vehicleInfo.isVehicleRided
 
+            displayLog('step', 'should ride vehicle: ', 'drive the dragon');
             const keys = ['KeyW', 'KeyA', 'KeyS', 'KeyD'];
             const key = keys[Math.floor(Math.random() * keys.length)];
             await page.keyboard.down(key);
@@ -234,7 +239,7 @@ const {
             await page.waitForTimeout(1000);
 
             //unride the dragon
-            printLog('should ride vehicle: unride the dragon');
+            displayLog('step', 'should ride vehicle: ', 'unride the dragon');
             await page.keyboard.press('KeyR');
             await page.evaluate(async () => {
                 globalWebaverse.game.dropSelectedApp();
@@ -253,7 +258,7 @@ const {
             });
             await page.waitForTimeout(1000);
 
-            printLog('should ride vehicle: move to zero position');
+            displayLog('step', 'should ride vehicle: ', 'move to zero position');
             await page.evaluate(async () => {
                 globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
                 {x: 0, y: 1.5, z: 0},
@@ -261,10 +266,14 @@ const {
             });
             await page.waitForTimeout(2000);
 
-            expect(isVehicleRided).toBeTruthy();
-            expect(vehicleMove.currentPosition).not.toBe(firstPosition);
-            // expect(vehicleMove.isCorrectMove).toBeTruthy();
-            expect(isVehicleUnRided).toBeTruthy();
+            displayLog('step', 'should ride vehicle: ', 'validation');
+            displayLog(isVehicleRided? 'success' : 'error', 'should ride vehicle: ', 'isVehicleRided');
+            displayLog(vehicleMove.currentPosition !== firstPosition? 'success' : 'error', 'should ride vehicle: ', 'moved');
+            displayLog(isVehicleUnRided? 'success' : 'error', 'should ride vehicle: ', 'isVehicleUnRided');
+
+            const isSuccess = isVehicleRided && vehicleMove.currentPosition !== firstPosition && isVehicleUnRided
+            displayLog(isSuccess ? 'passed' : 'fail', 'should ride vehicle: ', 'hovercraft');
+            expect(isSuccess).toBeTruthy();
         },
     totalTimeout,
     );

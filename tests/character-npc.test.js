@@ -2,7 +2,7 @@ const {
   launchBrowser,
   enterScene,
   closeBrowser,
-  printLog,
+  displayLog,
   totalTimeout,
   getCurrentPage,
 } = require('../utils/utils');
@@ -15,7 +15,7 @@ describe('should npc player works', () => {
     // 	window.todo = () => {}
     // })
     await enterScene(
-      `https://local.webaverse.com/?src=./packages/puppeteer-previewer/scenes/test-e2e-npc.scn`,
+      `https://local.webaverse.com/?src=./packages/automated-tests/scenes/test-e2e-npc.scn`,
     );
     const page = getCurrentPage();
     await page.click('#root');
@@ -30,9 +30,9 @@ describe('should npc player works', () => {
   test(
     'should npc player works: follow',
     async () => {
-      printLog('should npc player works: follow');
+      displayLog('section', 'should npc player works: ', 'follow');
       const page = getCurrentPage();
-      printLog('should npc player works: go to npc position');
+      displayLog('step', 'should npc player works: ', 'go to npc position');
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: -24.5},
@@ -45,7 +45,7 @@ describe('should npc player works', () => {
       });
       await page.waitForTimeout(2000);
 
-      printLog('should npc player works: use npc');
+      displayLog('step', 'should npc player works: ', 'use npc');
       await page.keyboard.down('KeyE');
       await page.waitForTimeout(4000);
       await page.keyboard.up('KeyE');
@@ -75,7 +75,7 @@ describe('should npc player works', () => {
       });
 
       //Todo: simulate walk
-      printLog('should npc player works: player start walk');
+      displayLog('step', 'should npc player works: ', 'player start walk');
       await page.keyboard.down('KeyS');
       await page.waitForTimeout(3000);
 
@@ -118,7 +118,7 @@ describe('should npc player works', () => {
       });
 
       //Todo: simulate run
-      printLog('should npc player works: player start run');
+      displayLog('step', 'should npc player works: ', 'player start run');
       await page.keyboard.down('ShiftRight');
       await page.waitForTimeout(500);
       await page.keyboard.down('KeyS');
@@ -152,7 +152,7 @@ describe('should npc player works', () => {
       await page.waitForTimeout(5000);
 
       //unuse npc
-      printLog('should npc player works: move to near position');
+      displayLog('step', 'should npc player works: ', 'move to near position');
       const currentNpcPosition = await page.evaluate(async () => {
         try {
           const currentNpc = globalWebaverse.npcManager.npcs.filter(
@@ -172,7 +172,7 @@ describe('should npc player works', () => {
 
       await page.waitForTimeout(5000);
 
-      printLog('should npc player works: unuse npc');
+      displayLog('step', 'should npc player works: ', 'unuse npc');
       await page.keyboard.down('KeyE');
       await page.waitForTimeout(4000);
       await page.keyboard.up('KeyE');
@@ -194,7 +194,7 @@ describe('should npc player works', () => {
         }
       });
 
-      printLog('should npc player works: move to zero position');
+      displayLog('step', 'should npc player works: ', 'move to zero position');
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 0},
@@ -202,14 +202,34 @@ describe('should npc player works', () => {
       });
       await page.waitForTimeout(2000);
 
-      expect(isNpcAttached).toBeTruthy();
-      expect(npcWalk.currentSpeed).toBeGreaterThan(0);
-      expect(npcWalk.idleWalkFactor).toBeGreaterThan(0.5);
-      expect(npcWalk.currentPosition).not.toBe(firstWalkPosition);
-      expect(npcRun.currentSpeed).toBeGreaterThan(0.5);
-      expect(npcRun.walkRunFactor).toBeGreaterThan(0.5);
-      expect(npcRun.currentPosition).not.toBe(firstRunPosition);
-      expect(isNpcUnAttached).toBeTruthy();
+      displayLog('step', 'should npc player works: ', 'Validation checking')
+
+      displayLog(isNpcAttached ? 'success' : 'error', 'should npc player works: use the NPC');
+
+      displayLog(npcWalk.currentSpeed > 0 ? 'success' : 'error', 'should npc player works: walk currentSpeed > 0');
+
+      displayLog(npcWalk.idleWalkFactor > 0.5 ? 'success' : 'error', 'should npc player works: walk  idleWalkFactor > 0.5');
+
+      displayLog(npcWalk.currentPosition !== firstWalkPosition? 'success' : 'error', 'should npc player works: ', 'walk moved');
+
+      displayLog(npcRun.currentSpeed > 0.5 ? 'success' : 'error', 'should npc player works: run currentSpeed > 0.5');
+
+      displayLog(npcRun.walkRunFactor > 0.5 ? 'success' : 'error', 'should npc player works: run walkRunFactor > 0.5');
+
+      displayLog(npcRun.currentPosition !== firstRunPosition? 'success' : 'error', 'should npc player works: ', 'run moved');
+
+      displayLog(isNpcUnAttached ? 'success' : 'error', 'should npc player works: unuse the NPC');
+
+      const isSuccess = isNpcAttached && npcWalk.currentSpeed > 0 && npcWalk.idleWalkFactor > 0.5
+                          && npcWalk.currentPosition !== firstWalkPosition && npcRun.currentSpeed > 0.5
+                          && npcRun.currentSpeed > 0.5 && npcRun.walkRunFactor > 0.5 && npcRun.currentPosition !== firstRunPosition
+                          && isNpcUnAttached
+
+      displayLog(isSuccess ? 'passed' : 'fail', 'should npc player works: ', 'movement');
+
+      expect(isSuccess).toBeTruthy();
+
+      
     },
     totalTimeout,
   );
@@ -217,8 +237,8 @@ describe('should npc player works', () => {
   test(
     'should npc player works: switch the avatars',
     async () => {
-      printLog('should npc player works: follow');
-      printLog('should npc player works: move to near position');
+      displayLog('section', 'should npc player works: ', 'switch the avatars');
+      displayLog('step', 'should npc player works: ', 'move to near position');
       const page = getCurrentPage();
 
       await page.waitForTimeout(10000);
@@ -236,7 +256,7 @@ describe('should npc player works', () => {
 
       await page.waitForTimeout(5000);
 
-      printLog('should npc player works: go to npc position');
+      displayLog('step', 'should npc player works: ', 'go to npc position');
       await page.evaluate(async currentNpcPosition => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: currentNpcPosition.x, y: 1.5, z: currentNpcPosition.z},
@@ -244,7 +264,7 @@ describe('should npc player works', () => {
       }, currentNpcPosition);
       await page.waitForTimeout(2000);
 
-      printLog('should npc player works: use npc');
+      displayLog('step', 'should npc player works: ', 'use npc');
       await page.keyboard.down('KeyE');
       await page.waitForTimeout(4000);
       await page.keyboard.up('KeyE');
@@ -266,7 +286,7 @@ describe('should npc player works', () => {
         return globalWebaverse.playersManager.localPlayer.name;
       });
 
-      printLog('should npc player works: switch the avatars');
+      displayLog('step', 'should npc player works: ', 'switch the avatars');
       await page.keyboard.press('KeyG');
       await page.waitForTimeout(2000);
 
@@ -274,7 +294,7 @@ describe('should npc player works', () => {
         return globalWebaverse.playersManager.localPlayer.name;
       });
 
-      printLog('should npc player works: switch the avatars');
+      displayLog('step', 'should npc player works: ', 'switch the avatars');
       await page.keyboard.press('KeyG');
       await page.waitForTimeout(2000);
 
@@ -283,7 +303,7 @@ describe('should npc player works', () => {
       });
 
       //unuse npc
-      printLog('should npc player works: move to near position');
+      displayLog('step', 'should npc player works: ', 'move to near position');
       currentNpcPosition = await page.evaluate(async () => {
         try {
           const currentNpc = globalWebaverse.npcManager.npcs.filter(
@@ -303,7 +323,7 @@ describe('should npc player works', () => {
 
       await page.waitForTimeout(5000);
 
-      printLog('should npc player works: unuse npc');
+      displayLog('step', 'should npc player works: ', 'unuse npc');
       await page.keyboard.down('KeyE');
       await page.waitForTimeout(4000);
       await page.keyboard.up('KeyE');
@@ -325,7 +345,7 @@ describe('should npc player works', () => {
         }
       });
 
-      printLog('should npc player works: move to zero position');
+      displayLog('step', 'should npc player works: ', 'move to zero position');
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 0},
@@ -333,10 +353,15 @@ describe('should npc player works', () => {
       });
       await page.waitForTimeout(2000);
 
-      expect(isNpcAttached).toBeTruthy();
-      expect(switchedAvatarName).not.toBe(currentAvatarName);
-      expect(reSwitchedAvatarName).toBe(currentAvatarName);
-      expect(isNpcUnAttached).toBeTruthy();
+      displayLog(isNpcAttached ? 'success' : 'error', 'should npc player works: use the NPC');
+      displayLog(switchedAvatarName !== currentAvatarName ? 'success' : 'error', 'should npc player works: switch the NPC');
+      displayLog(reSwitchedAvatarName == currentAvatarName ? 'success' : 'error', 'should npc player works: switch the NPC');
+      displayLog(isNpcUnAttached ? 'success' : 'error', 'should npc player works: unuse the NPC');
+
+      const isSuccess = isNpcAttached && switchedAvatarName !== currentAvatarName
+                          && reSwitchedAvatarName == currentAvatarName && isNpcUnAttached
+
+      displayLog(isSuccess ? 'passed' : 'fail', 'should npc player works: ', 'switch');
     },
     totalTimeout,
   );

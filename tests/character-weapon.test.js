@@ -2,7 +2,7 @@ const {
   launchBrowser,
   enterScene,
   closeBrowser,
-  printLog,
+  displayLog,
   totalTimeout,
   getCurrentPage,
   getDimensions,
@@ -16,7 +16,7 @@ describe('should wear and use weapon', () => {
     // 	window.todo = () => {}
     // })
     await enterScene(
-      `https://local.webaverse.com/?src=./packages/puppeteer-previewer/scenes/test-e2e-weapon.scn`,
+      `https://local.webaverse.com/?src=./packages/automated-tests/scenes/test-e2e-weapon.scn`,
     );
     const page = getCurrentPage();
     await page.click('#root');
@@ -31,10 +31,10 @@ describe('should wear and use weapon', () => {
   test(
     'should wear and use weapon: sword',
     async () => {
-      printLog('should wear and use weapon: sword');
+      displayLog('section', 'should wear and use weapon: ', 'sword');
       const page = getCurrentPage();
       //move to sword position and rotate
-      printLog('should wear and use sword: move to sword position');
+      displayLog('step', 'should wear and use sword: ', 'move to sword position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 1.5},
@@ -43,7 +43,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //grab the sword
-      printLog('should wear and use sword: grab the sword');
+      displayLog('step', 'should wear and use sword: ', 'grab the sword')
       await page.keyboard.down('KeyE');
       await page.waitForTimeout(4000);
       await page.keyboard.up('KeyE');
@@ -67,7 +67,7 @@ describe('should wear and use weapon', () => {
       });
 
       //move to front of target //NPC01
-      printLog('should wear and use sword: move to front of target');
+      displayLog('step', 'should wear and use sword: ', 'move to front of target')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 7.5},
@@ -81,7 +81,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //attack
-      printLog('should wear and use sword: attack');
+      displayLog('step', 'should wear and use sword: ', 'attack')
       await page.mouse.down();
       await page.evaluate(async () => {
         //ToDo: we should try run mouse down manually because of this issue.
@@ -126,7 +126,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //move to sword position
-      printLog('should wear and use sword: move to sword position');
+      displayLog('step', 'should wear and use sword: ', 'move to sword position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 1.5},
@@ -135,7 +135,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //ungrab the sword
-      printLog('should wear and use sword: ungrab the sword');
+      displayLog('step', 'should wear and use sword: ', 'ungrab the sword')
       await page.keyboard.press('KeyR');
       await page.evaluate(async () => {
         globalWebaverse.game.dropSelectedApp();
@@ -159,7 +159,7 @@ describe('should wear and use weapon', () => {
 
       await page.waitForTimeout(2000);
       //goto zero position
-      printLog('should wear and use sword: goto zero position');
+      displayLog('step', 'should wear and use sword: ', 'goto zero position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 0},
@@ -167,11 +167,23 @@ describe('should wear and use weapon', () => {
       });
       await page.waitForTimeout(2000);
 
-      expect(isWeaponAttached).toBeTruthy();
-      expect(attackResult.useTime).toBeGreaterThan(0);
-      expect(attackResult.useAnimation).toMatch(/combo/);
-      expect(isWeaponUnAttached).toBeTruthy();
-      expect(attackResult.npcHealth).toBeLessThan(currentNpcHealth);
+      displayLog('step', 'should wear and use weapon: ', 'Validation checking')
+
+      displayLog(isWeaponAttached ? 'success' : 'error', 'should wear and use sword: ', 'grab the weapon');
+
+      displayLog(attackResult.useTime > 0 && attackResult.useAnimation === 'combo' ? 'success' : 'error', 'should wear and use sword: ', 'weapon animation');
+
+      displayLog(isWeaponUnAttached ? 'success' : 'error', 'should wear and use sword: ', 'ungrab the weapon');
+
+      displayLog(attackResult.npcHealth <  currentNpcHealth ? 'success' : 'error', 'should wear and use sword: health changed');
+
+      const isSuccess = attackResult && attackResult.useTime > 0
+                          && attackResult.useAnimation === 'combo' && isWeaponUnAttached
+                          && attackResult.npcHealth <  currentNpcHealth
+
+      displayLog(isSuccess ? 'passed' : 'fail', 'should wear and use weapon: ', 'sword');
+
+      expect(isSuccess).toBeTruthy();
     },
     totalTimeout,
   );
@@ -179,10 +191,10 @@ describe('should wear and use weapon', () => {
   test(
     'should wear and use weapon: silsword',
     async () => {
-      printLog('should wear and use weapon: silsword');
+      displayLog('section', 'should wear and use weapon: ', 'silsword');
       const page = getCurrentPage();
       //move to silsword position and rotate
-      printLog('should wear and use silsword: move to silsword position');
+      displayLog('step', 'should wear and use silsword: ', 'move to silsword position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 2, y: 1.5, z: 1.5},
@@ -191,7 +203,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //grab the silsword
-      printLog('should wear and use silsword: grab the silsword');
+      displayLog('step', 'should wear and use silsword: ', 'grab the silsword')
       await page.keyboard.down('KeyE');
       await page.waitForTimeout(4000);
       await page.keyboard.up('KeyE');
@@ -215,7 +227,7 @@ describe('should wear and use weapon', () => {
       });
 
       //move to front of target //NPC01
-      printLog('should wear and use silsword: move to front of target');
+      displayLog('step', 'should wear and use silsword: ', 'move to front of target')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 2, y: 1.5, z: 7.5},
@@ -229,7 +241,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(5000);
 
       //attack
-      printLog('should wear and use silsword: attack');
+      displayLog('step', 'should wear and use silsword: ', 'attack')
       await page.mouse.down();
       await page.evaluate(async () => {
         //ToDo: we should try run mouse down manually because of this issue.
@@ -271,7 +283,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //move to sword position
-      printLog('should wear and use silsword: move to silsword position');
+      displayLog('step', 'should wear and use silsword: ', 'move to silsword position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 2, y: 1.5, z: 1.5},
@@ -280,7 +292,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(5000);
 
       //ungrab the silsword
-      printLog('should wear and use silsword: ungrab the silsword');
+      displayLog('step', 'should wear and use silsword: ', 'ungrab the silsword')
       await page.keyboard.press('KeyR');
       await page.evaluate(async () => {
         globalWebaverse.game.dropSelectedApp();
@@ -305,7 +317,7 @@ describe('should wear and use weapon', () => {
 
       await page.waitForTimeout(2000);
       //goto zero position
-      printLog('should wear and use silsword: goto zero position');
+      displayLog('step', 'should wear and use silsword: ', 'goto zero position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 0},
@@ -313,10 +325,24 @@ describe('should wear and use weapon', () => {
       });
       await page.waitForTimeout(2000);
 
-      expect(isWeaponAttached).toBeTruthy();
-      expect(attackResult.useAnimationCombo.length).toBeGreaterThan(0);
-      expect(isWeaponUnAttached).toBeTruthy();
-      expect(attackResult.npcHealth).toBeLessThan(currentNpcHealth);
+      displayLog('step', 'should wear and use weapon: ', 'Validation checking')
+
+      displayLog(isWeaponAttached ? 'success' : 'error', 'should wear and use silsword: ', 'grab the weapon');
+
+      displayLog(attackResult.useAnimationCombo.length > 0 ? 'success' : 'error', 'should wear and use silsword: ', 'weapon animation');
+
+      displayLog(isWeaponUnAttached ? 'success' : 'error', 'should wear and use silsword: ', 'ungrab the weapon');
+
+      displayLog(attackResult.npcHealth <  currentNpcHealth ? 'success' : 'error', 'should wear and use sword: health changed');
+
+      const isSuccess = isWeaponAttached 
+                          && attackResult.useAnimationCombo.length > 0
+                          && isWeaponUnAttached
+                          && attackResult.npcHealth <  currentNpcHealth
+
+      displayLog(isSuccess ? 'passed' : 'fail', 'should wear and use weapon: ', 'silsword');
+
+      expect(isSuccess).toBeTruthy();
     },
     totalTimeout,
   );
@@ -324,10 +350,10 @@ describe('should wear and use weapon', () => {
   test(
     'should wear and use weapon: pistol',
     async () => {
-      printLog('should wear and use weapon: pistol');
+      displayLog('section', 'should wear and use weapon: ', 'pistol');
       const page = getCurrentPage();
-      //move to pistol position and rotate
-      printLog('should wear and use pistol: move to pistol position');
+      //move to silsword position and rotate
+      displayLog('step', 'should wear and use pistol: ', 'move to pistol position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 4, y: 1.5, z: 1.9},
@@ -336,7 +362,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //grab the pistol
-      printLog('should wear and use pistol: grab the pistol');
+      displayLog('step', 'should wear and use pistol: ', 'grab the pistol')
       await page.keyboard.down('KeyE');
       await page.waitForTimeout(4000);
       await page.keyboard.up('KeyE');
@@ -360,7 +386,7 @@ describe('should wear and use weapon', () => {
       });
 
       //move to front of target //NPC01
-      printLog('should wear and use pistol: move to front of target');
+      displayLog('step', 'should wear and use pistol: ', 'move to front of target')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 3.85, y: 1.5, z: 8.5},
@@ -380,7 +406,7 @@ describe('should wear and use weapon', () => {
         }
       });
 
-      printLog('should wear and use pistol: crouch to front of target');
+      displayLog('step', 'should wear and use pistol: ', 'crouch to front of target')
       await page.keyboard.down('ControlLeft');
       await page.keyboard.down('KeyC');
       await page.waitForTimeout(100);
@@ -395,7 +421,7 @@ describe('should wear and use weapon', () => {
       });
 
       //attack
-      printLog('should wear and use pistol: attack');
+      displayLog('step', 'should wear and use pistol: ', 'attack')
       // await page.mouse.down({button: "right"});
       await page.evaluate(async () => {
         //ToDo: we should try run mouse down manually because of this issue.
@@ -447,7 +473,7 @@ describe('should wear and use weapon', () => {
 
       await page.waitForTimeout(2000);
 
-      printLog('should wear and use pistol: crouch to front of target');
+      displayLog('step', 'should wear and use pistol: ', 'crouch to front of target')
       await page.keyboard.down('ControlLeft');
       await page.keyboard.down('KeyC');
       await page.waitForTimeout(100);
@@ -456,7 +482,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(100);
 
       //move to sword position
-      printLog('should wear and use pistol: move to pistol position');
+      displayLog('step', 'should wear and use pistol: ', 'move to pistol position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 4, y: 1.5, z: 1.5},
@@ -465,7 +491,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(5000);
 
       //ungrab the pistol
-      printLog('should wear and use pistol: ungrab the pistol');
+      displayLog('step', 'should wear and use pistol: ', 'ungrab the pistol')
       await page.keyboard.press('KeyR');
       await page.evaluate(async () => {
         globalWebaverse.game.dropSelectedApp();
@@ -490,7 +516,7 @@ describe('should wear and use weapon', () => {
 
       await page.waitForTimeout(2000);
       //goto zero position
-      printLog('should wear and use pistol: goto zero position');
+      displayLog('step', 'should wear and use pistol: ', 'goto zero position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 0},
@@ -498,12 +524,27 @@ describe('should wear and use weapon', () => {
       });
       await page.waitForTimeout(2000);
 
-      expect(isWeaponAttached).toBeTruthy();
-      expect(playerCrouchFactor).toBeGreaterThan(0);
-      expect(attackResult.aimState).toBeTruthy();
-      expect(attackResult.aimTime).toBeGreaterThan(0);
-      expect(isWeaponUnAttached).toBeTruthy();
-      expect(attackResult.npcHealth).toBeLessThan(currentNpcHealth);
+      displayLog('step', 'should wear and use weapon: ', 'Validation checking')
+
+      displayLog(isWeaponAttached ? 'success' : 'error', 'should wear and use pistol: ', 'grab the weapon');
+
+      displayLog(playerCrouchFactor > 0 ? 'success' : 'error', 'should wear and use pistol: ', 'crounch');
+
+      displayLog(attackResult.aimState && attackResult.aimTime > 0  ? 'success' : 'error', 'should wear and use pistol: ', 'weapon aim');
+
+      displayLog(isWeaponUnAttached ? 'success' : 'error', 'should wear and use pistol: ', 'ungrab the weapon');
+
+      displayLog(attackResult.npcHealth <  currentNpcHealth ? 'success' : 'error', 'should wear and use pistol: health changed');
+
+      const isSuccess = isWeaponAttached 
+                          && playerCrouchFactor > 0 
+                          && attackResult.aimState && attackResult.aimTime > 0
+                          && isWeaponUnAttached
+                          && attackResult.npcHealth <  currentNpcHealth
+
+      displayLog(isSuccess ? 'passed' : 'fail', 'should wear and use weapon: ', 'pistol');
+
+      expect(isSuccess).toBeTruthy();
     },
     totalTimeout,
   );
@@ -511,12 +552,10 @@ describe('should wear and use weapon', () => {
   test(
     'should wear and use weapon: machine-gun',
     async () => {
-      printLog('should wear and use weapon: machine-gun');
+      displayLog('section', 'should wear and use weapon: ', 'machine-gun');
       const page = getCurrentPage();
-      //move to machine-gun position and rotate
-      printLog(
-        'should wear and use machine-gun: move to machine-gun position',
-      );
+      //move to silsword position and rotate
+      displayLog('step', 'should wear and use machine-gun: ', 'move to machine-gun position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 6, y: 1.5, z: 1.9},
@@ -525,7 +564,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //grab the pistol
-      printLog('should wear and use machine-gun: grab the machine-gun');
+      displayLog('step', 'should wear and use machine-gun: ', 'grab the machine-gun')
       await page.keyboard.down('KeyE');
       await page.waitForTimeout(4000);
       await page.keyboard.up('KeyE');
@@ -549,7 +588,7 @@ describe('should wear and use weapon', () => {
       });
 
       //move to front of target //NPC04
-      printLog('should wear and use machine-gun: move to front of target');
+      displayLog('step', 'should wear and use machine-gun: ', 'move to front of target')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 5.85, y: 1.5, z: 8.5},
@@ -569,7 +608,7 @@ describe('should wear and use weapon', () => {
         }
       });
 
-      printLog('should wear and use machine-gun: crouch to front of target');
+      displayLog('step', 'should wear and use machine-gun: ', 'crouch to front of target')
       await page.keyboard.down('ControlLeft');
       await page.keyboard.down('KeyC');
       await page.waitForTimeout(100);
@@ -584,7 +623,7 @@ describe('should wear and use weapon', () => {
       });
 
       //attack
-      printLog('should wear and use machine-gun: attack');
+      displayLog('step', 'should wear and use machine-gun: ', 'attack')
       // await page.mouse.down({button: "right"});
       await page.evaluate(async () => {
         //ToDo: we should try run mouse down manually because of this issue.
@@ -633,7 +672,7 @@ describe('should wear and use weapon', () => {
 
       await page.waitForTimeout(2000);
 
-      printLog('should wear and use machine-gun: crouch to front of target');
+      displayLog('step', 'should wear and use machine-gun: ', 'crouch to front of target')
       await page.keyboard.down('ControlLeft');
       await page.keyboard.down('KeyC');
       await page.waitForTimeout(100);
@@ -642,9 +681,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(100);
 
       //move to sword position
-      printLog(
-        'should wear and use machine-gun: move to machine-gun position',
-      );
+      displayLog('step', 'should wear and use machine-gun: ', 'move to machine-gun position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 6, y: 1.5, z: 1.5},
@@ -653,7 +690,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(5000);
 
       //ungrab the machine-gun
-      printLog('should wear and use machine-gun: ungrab the machine-gun');
+      displayLog('step', 'should wear and use machine-gun: ', 'ungrab the machine-gun')
       await page.keyboard.press('KeyR');
       await page.evaluate(async () => {
         globalWebaverse.game.dropSelectedApp();
@@ -678,7 +715,7 @@ describe('should wear and use weapon', () => {
 
       await page.waitForTimeout(2000);
       //goto zero position
-      printLog('should wear and use machine-gun: goto zero position');
+      displayLog('step', 'should wear and use machine-gun: ', 'goto zero position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 0},
@@ -686,12 +723,27 @@ describe('should wear and use weapon', () => {
       });
       await page.waitForTimeout(2000);
 
-      expect(isWeaponAttached).toBeTruthy();
-      expect(playerCrouchFactor).toBeGreaterThan(0);
-      expect(attackResult.aimState).toBeTruthy();
-      expect(attackResult.aimTime).toBeGreaterThan(0);
-      expect(isWeaponUnAttached).toBeTruthy();
-      expect(attackResult.npcHealth).toBeLessThan(currentNpcHealth);
+      displayLog('step', 'should wear and use weapon: ', 'Validation checking')
+
+      displayLog(isWeaponAttached ? 'success' : 'error', 'should wear and use  machine-gun: ', 'grab the weapon');
+
+      displayLog(playerCrouchFactor > 0 ? 'success' : 'error', 'should wear and use  machine-gun: ', 'crounch');
+
+      displayLog(attackResult.aimState && attackResult.aimTime > 0  ? 'success' : 'error', 'should wear and use  machine-gun: ', 'weapon aim');
+
+      displayLog(isWeaponUnAttached ? 'success' : 'error', 'should wear and use machine-gun: ', 'ungrab the weapon');
+
+      displayLog(attackResult.npcHealth <  currentNpcHealth ? 'success' : 'error', 'should wear and use  machine-gun: health changed');
+
+      const isSuccess = isWeaponAttached 
+                          && playerCrouchFactor > 0 
+                          && attackResult.aimState && attackResult.aimTime > 0
+                          && isWeaponUnAttached
+                          && attackResult.npcHealth <  currentNpcHealth
+
+      displayLog(isSuccess ? 'passed' : 'fail', 'should wear and use weapon: ', ' machine-gun');
+
+      expect(isSuccess).toBeTruthy();
     },
     totalTimeout,
   );
@@ -699,10 +751,10 @@ describe('should wear and use weapon', () => {
   test(
     'should wear and use weapon: uzi',
     async () => {
-      printLog('should wear and use weapon: uzi');
+      displayLog('section', 'should wear and use weapon: ', 'uzi');
       const page = getCurrentPage();
-      //move to uzi position and rotate
-      printLog('should wear and use uzi: move to uzi position');
+      //move to silsword position and rotate
+      displayLog('step', 'should wear and use uzi: ', 'move to uzi position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 8, y: 1.5, z: 1.9},
@@ -711,7 +763,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //grab the pistol
-      printLog('should wear and use uzi: grab the uzi');
+      displayLog('step', 'should wear and use uzi: ', 'grab the uzi')
       await page.keyboard.down('KeyE');
       await page.waitForTimeout(4000);
       await page.keyboard.up('KeyE');
@@ -735,7 +787,7 @@ describe('should wear and use weapon', () => {
       });
 
       //move to front of target //NPC05
-      printLog('should wear and use uzi: move to front of target');
+      displayLog('step', 'should wear and use uzi: ', 'move to front of target')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 7.85, y: 1.5, z: 8.5},
@@ -755,7 +807,7 @@ describe('should wear and use weapon', () => {
         }
       });
 
-      printLog('should wear and use uzi: crouch to front of target');
+      displayLog('step', 'should wear and use uzi: ', 'crouch to front of target')
       await page.keyboard.down('ControlLeft');
       await page.keyboard.down('KeyC');
       await page.waitForTimeout(100);
@@ -770,7 +822,7 @@ describe('should wear and use weapon', () => {
       });
 
       //attack
-      printLog('should wear and use uzi: attack');
+      displayLog('step', 'should wear and use uzi: ', 'attack')
       // await page.mouse.down({button: "right"});
       await page.evaluate(async () => {
         //ToDo: we should try run mouse down manually because of this issue.
@@ -819,7 +871,7 @@ describe('should wear and use weapon', () => {
 
       await page.waitForTimeout(2000);
 
-      printLog('should wear and use uzi: crouch to front of target');
+      displayLog('step', 'should wear and use uzi: ', 'crouch to front of target')
       await page.keyboard.down('ControlLeft');
       await page.keyboard.down('KeyC');
       await page.waitForTimeout(100);
@@ -828,7 +880,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(100);
 
       //move to sword position
-      printLog('should wear and use uzi: move to uzi position');
+      displayLog('step', 'should wear and use uzi: ', 'move to uzi position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 8, y: 1.5, z: 1.5},
@@ -837,7 +889,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(5000);
 
       //ungrab the uzi
-      printLog('should wear and use uzi: ungrab the uzi');
+      displayLog('step', 'should wear and use uzi: ', 'ungrab the uzi')
       await page.keyboard.press('KeyR');
       await page.evaluate(async () => {
         globalWebaverse.game.dropSelectedApp();
@@ -862,7 +914,7 @@ describe('should wear and use weapon', () => {
 
       await page.waitForTimeout(2000);
       //goto zero position
-      printLog('should wear and use uzi: goto zero position');
+      displayLog('step', 'should wear and use uzi: ', 'goto zero position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 0},
@@ -870,12 +922,27 @@ describe('should wear and use weapon', () => {
       });
       await page.waitForTimeout(2000);
 
-      expect(isWeaponAttached).toBeTruthy();
-      expect(playerCrouchFactor).toBeGreaterThan(0);
-      expect(attackResult.aimState).toBeTruthy();
-      expect(attackResult.aimTime).toBeGreaterThan(0);
-      expect(isWeaponUnAttached).toBeTruthy();
-      expect(attackResult.npcHealth).toBeLessThan(currentNpcHealth);
+      displayLog('step', 'should wear and use weapon: ', 'Validation checking')
+
+      displayLog(isWeaponAttached ? 'success' : 'error', 'should wear and use  uzi: ', 'grab the weapon');
+
+      displayLog(playerCrouchFactor > 0 ? 'success' : 'error', 'should wear and use uzi: ', 'crounch');
+
+      displayLog(attackResult.aimState && attackResult.aimTime > 0  ? 'success' : 'error', 'should wear and use uzi: ', 'weapon aim');
+
+      displayLog(isWeaponUnAttached ? 'success' : 'error', 'should wear and use uzi: ', 'ungrab the weapon');
+
+      displayLog(attackResult.npcHealth <  currentNpcHealth ? 'success' : 'error', 'should wear and use uzi: health changed');
+
+      const isSuccess = isWeaponAttached 
+                          && playerCrouchFactor > 0 
+                          && attackResult.aimState && attackResult.aimTime > 0
+                          && isWeaponUnAttached
+                          && attackResult.npcHealth <  currentNpcHealth
+
+      displayLog(isSuccess ? 'passed' : 'fail', 'should wear and use weapon: ', 'uzi');
+
+      expect(isSuccess).toBeTruthy();
     },
     totalTimeout,
   );
@@ -883,10 +950,10 @@ describe('should wear and use weapon', () => {
   test(
     'should wear and use weapon: bow',
     async () => {
-      printLog('should wear and use weapon: bow');
+      displayLog('section', 'should wear and use weapon: ', 'bow');
       const page = getCurrentPage();
-      //move to bow position and rotate
-      printLog('should wear and use bow: move to bow position');
+      //move to silsword position and rotate
+      displayLog('step', 'should wear and use bow: ', 'move to bow position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: -2, y: 1.5, z: 1.9},
@@ -895,7 +962,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //grab the bow
-      printLog('should wear and use bow: grab the bow');
+      displayLog('step', 'should wear and use bow: ', 'grab the bow')
       await page.keyboard.down('KeyE');
       await page.waitForTimeout(4000);
       await page.keyboard.up('KeyE');
@@ -919,7 +986,7 @@ describe('should wear and use weapon', () => {
       });
 
       //move to front of target //NPC01
-      printLog('should wear and use bow: move to front of target');
+      displayLog('step', 'should wear and use bow: ', 'move to front of target')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: -2.15, y: 1.5, z: 8.8},
@@ -939,7 +1006,7 @@ describe('should wear and use weapon', () => {
         }
       });
 
-      printLog('should wear and use bow: crouch to front of target');
+      displayLog('step', 'should wear and use bow: ', 'crouch to front of target')
       await page.keyboard.down('ControlLeft');
       await page.keyboard.down('KeyC');
       await page.waitForTimeout(100);
@@ -954,7 +1021,7 @@ describe('should wear and use weapon', () => {
       });
 
       //attack
-      printLog('should wear and use bow: attack');
+      displayLog('step', 'should wear and use bow: ', 'attack')
       // await page.mouse.down({button: "right"});
       await page.evaluate(async () => {
         //ToDo: we should try run mouse down manually because of this issue.
@@ -1006,7 +1073,7 @@ describe('should wear and use weapon', () => {
 
       await page.waitForTimeout(2000);
 
-      printLog('should wear and use bow: crouch to front of target');
+      displayLog('step', 'should wear and use bow: ', 'crouch to front of target')
       await page.keyboard.down('ControlLeft');
       await page.keyboard.down('KeyC');
       await page.waitForTimeout(100);
@@ -1015,7 +1082,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(100);
 
       //move to sword position
-      printLog('should wear and use bow: move to bow position');
+      displayLog('step', 'should wear and use bow: ', 'move to bow position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: -2, y: 1.5, z: 1.5},
@@ -1024,7 +1091,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(5000);
 
       //ungrab the bow
-      printLog('should wear and use bow: ungrab the bow');
+      displayLog('step', 'should wear and use bow: ', 'ungrab the bow')
       await page.keyboard.press('KeyR');
       await page.evaluate(async () => {
         globalWebaverse.game.dropSelectedApp();
@@ -1049,7 +1116,7 @@ describe('should wear and use weapon', () => {
 
       await page.waitForTimeout(2000);
       //goto zero position
-      printLog('should wear and use bow: goto zero position');
+      displayLog('step', 'should wear and use bow: ', 'goto zero position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 0},
@@ -1057,12 +1124,27 @@ describe('should wear and use weapon', () => {
       });
       await page.waitForTimeout(2000);
 
-      expect(isWeaponAttached).toBeTruthy();
-      expect(playerCrouchFactor).toBeGreaterThan(0);
-      expect(attackResult.aimState).toBeTruthy();
-      expect(attackResult.aimTime).toBeGreaterThan(0);
-      expect(isWeaponUnAttached).toBeTruthy();
-      expect(attackResult.npcHealth).toBeLessThan(currentNpcHealth);
+      displayLog('step', 'should wear and use weapon: ', 'Validation checking')
+
+      displayLog(isWeaponAttached ? 'success' : 'error', 'should wear and use  bow: ', 'grab the weapon');
+
+      displayLog(playerCrouchFactor > 0 ? 'success' : 'error', 'should wear and use bow: ', 'crounch');
+
+      displayLog(attackResult.aimState && attackResult.aimTime > 0  ? 'success' : 'error', 'should wear and use bow: ', 'weapon aim');
+
+      displayLog(isWeaponUnAttached ? 'success' : 'error', 'should wear and use bow: ', 'ungrab the weapon');
+
+      displayLog(attackResult.npcHealth <  currentNpcHealth ? 'success' : 'error', 'should wear and use bow: health changed');
+
+      const isSuccess = isWeaponAttached 
+                          && playerCrouchFactor > 0 
+                          && attackResult.aimState && attackResult.aimTime > 0
+                          && isWeaponUnAttached
+                          && attackResult.npcHealth <  currentNpcHealth
+
+      displayLog(isSuccess ? 'passed' : 'fail', 'should wear and use weapon: ', 'bow');
+
+      expect(isSuccess).toBeTruthy();
     },
     totalTimeout,
   );
@@ -1070,10 +1152,10 @@ describe('should wear and use weapon', () => {
   test(
     'should wear and use weapon: rpg',
     async () => {
-      printLog('should wear and use weapon: rpg');
+      displayLog('section', 'should wear and use weapon: ', 'rpg');
       const page = getCurrentPage();
-      //move to rpg position and rotate
-      printLog('should wear and use rpg: move to rpg position');
+      //move to silsword position and rotate
+      displayLog('step', 'should wear and use rpg: ', 'move to rpg position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: -4, y: 1.5, z: 1.9},
@@ -1082,7 +1164,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //grab the rpg
-      printLog('should wear and use rpg: grab the rpg');
+      displayLog('step', 'should wear and use rpg: ', 'grab the rpg')
       await page.keyboard.down('KeyE');
       await page.waitForTimeout(4000);
       await page.keyboard.up('KeyE');
@@ -1106,7 +1188,7 @@ describe('should wear and use weapon', () => {
       });
 
       //move to front of target //NPC01
-      printLog('should wear and use rpg: move to front of target');
+      displayLog('step', 'should wear and use rpg: ', 'move to front of target')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: -4.15, y: 1.5, z: 12},
@@ -1127,7 +1209,7 @@ describe('should wear and use weapon', () => {
       });
 
       //attack
-      printLog('should wear and use rpg: attack');
+      displayLog('step', 'should wear and use rpg: ', 'attack')
       // await page.mouse.down({button: "right"});
       await page.evaluate(async () => {
         //ToDo: we should try run mouse down manually because of this issue.
@@ -1179,7 +1261,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(2000);
 
       //move to sword position
-      printLog('should wear and use rpg: move to rpg position');
+      displayLog('step', 'should wear and use rpg: ', 'move to rpg position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: -4, y: 1.5, z: 1.5},
@@ -1188,7 +1270,7 @@ describe('should wear and use weapon', () => {
       await page.waitForTimeout(5000);
 
       //ungrab the rpg
-      printLog('should wear and use rpg: ungrab the rpg');
+      displayLog('step', 'should wear and use rpg: ', 'ungrab the rpg')
       await page.keyboard.press('KeyR');
       await page.evaluate(async () => {
         globalWebaverse.game.dropSelectedApp();
@@ -1213,7 +1295,7 @@ describe('should wear and use weapon', () => {
 
       await page.waitForTimeout(2000);
       //goto zero position
-      printLog('should wear and use bow: goto zero position');
+      displayLog('step', 'should wear and use rpg: ', 'goto zero position')
       await page.evaluate(async () => {
         globalWebaverse.playersManager.localPlayer.characterPhysics.setPosition(
           {x: 0, y: 1.5, z: 0},
@@ -1221,12 +1303,25 @@ describe('should wear and use weapon', () => {
       });
       await page.waitForTimeout(2000);
 
-      expect(isWeaponAttached).toBeTruthy();
-      expect(attackResult.aimState).toBeTruthy();
-      expect(attackResult.aimTime).toBeGreaterThan(0);
-      expect(isWeaponUnAttached).toBeTruthy();
-      //Todo: we need check it later
-      // expect(attackResult.npcHealth).toBeLessThan(currentNpcHealth);
+      displayLog('step', 'should wear and use weapon: ', 'Validation checking')
+
+      displayLog(isWeaponAttached ? 'success' : 'error', 'should wear and use rpg: ', 'grab the weapon');
+
+
+      displayLog(attackResult.aimState && attackResult.aimTime > 0  ? 'success' : 'error', 'should wear and use rpg: ', 'weapon aim');
+
+      displayLog(isWeaponUnAttached ? 'success' : 'error', 'should wear and use rpg: ', 'ungrab the weapon');
+
+      // displayLog(attackResult.npcHealth <  currentNpcHealth ? 'success' : 'error', 'should wear and use rpg: health changed');
+
+      const isSuccess = isWeaponAttached 
+                          && attackResult.aimState && attackResult.aimTime > 0
+                          && isWeaponUnAttached
+                          // && attackResult.npcHealth <  currentNpcHealth
+
+      displayLog(isSuccess ? 'passed' : 'fail', 'should wear and use weapon: ', 'rpg');
+
+      expect(isSuccess).toBeTruthy();
     },
     totalTimeout,
   );

@@ -8,8 +8,12 @@
 module.exports = {
   preset: 'jest-puppeteer',
   testMatch: ['./**.test.js'],
-  verbose: true,
+  verbose: false,
   notifyMode: 'always',
   maxWorkers: '50%',
   maxConcurrency: 1,
+  // reporters: [
+  //   'default',
+  //   '<rootDir>/utils/custom-reporter.js'
+  // ],
 };

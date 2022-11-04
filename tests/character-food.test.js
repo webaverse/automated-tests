@@ -15,7 +15,7 @@ describe('should eat and drink', () => {
     // 	window.todo = () => {}
     // })
     await enterScene(
-      'https://local.webaverse.com/?src=./packages/puppeteer-previewer/scenes/test-e2e-food.scn',
+      'https://local.webaverse.com/?src=./packages/automated-tests/scenes/test-e2e-food.scn',
     );
     const page = getCurrentPage();
     await page.click('#root');
@@ -113,31 +113,15 @@ describe('should eat and drink', () => {
 
       displayLog('step', 'should eat and drink: ', 'Validation checking')
 
-      if (!isFoodAttached) {
-        displayLog('error', 'The fruit is not grabbed properly');
-      } else {
-        displayLog('success', 'The fruit is grabbed properly');
-      }
+      displayLog(isFoodAttached ? 'success' : 'error', 'should eat and drink: grab the fruit');
 
-      if (feedResult.useTime > 0 && feedResult.useAnimation === 'eat') {
-        displayLog('error', 'The feed animation is not working properly');
-      } else {
-        displayLog('success', 'The feed animation is working properly');
-      }
+      displayLog(feedResult.useTime > 0 && feedResult.useAnimation === 'eat' ? 'success' : 'error', 'should eat and drink: eat animation');
 
-      if (!isFoodUnAttached) {
-        displayLog('error', 'The fruit is not ungrabbed properly');
-      } else {
-        displayLog('success', 'The fruit is ungrabbed properly');
-      }
+      displayLog(isFoodUnAttached ? 'success' : 'error', 'should eat and drink: ungrab the fruit');
 
       const isSuccess = isFoodAttached && feedResult.useTime > 0 && feedResult.useAnimation === 'eat' && isFoodUnAttached
 
-      if (isSuccess) {
-        displayLog('passed', 'Should eat and drink successed: ', 'fruit');
-      } else {
-        displayLog('fail', 'Should eat and drink failed: ', 'fruit');
-      }
+      displayLog(isSuccess ? 'passed' : 'fail', 'should eat and drink: ', 'fruit');
 
       expect(isSuccess).toBeTruthy();
     },
@@ -237,31 +221,15 @@ describe('should eat and drink', () => {
 
       displayLog('step', 'should eat and drink: ', 'Validation checking')
 
-      if (!isFoodAttached) {
-        displayLog('error', 'The potion is not grabbed properly');
-      } else {
-        displayLog('success', 'The potion is grabbed properly');
-      }
+      displayLog(isFoodAttached ? 'success' : 'error', 'should eat and drink: grab the potion');
 
-      if (feedResult.useTime > 0 && feedResult.useAnimation === 'drink') {
-        displayLog('error', 'The feed animation is not working properly');
-      } else {
-        displayLog('success', 'The feed animation is working properly');
-      }
+      displayLog(feedResult.useTime > 0 && feedResult.useAnimation === 'drink' ? 'success' : 'error', 'should eat and drink: eat animation');
 
-      if (!isFoodUnAttached) {
-        displayLog('error', 'The potion is not ungrabbed properly');
-      } else {
-        displayLog('success', 'The potion is ungrabbed properly');
-      }
+      displayLog(isFoodUnAttached ? 'success' : 'error', 'should eat and drink: ungrab the potion');
 
       const isSuccess = isFoodAttached && feedResult.useTime > 0 && feedResult.useAnimation === 'drink' && isFoodUnAttached
 
-      if (isSuccess) {
-        displayLog('passed', 'Should eat and drink successed: ', 'potion');
-      } else {
-        displayLog('fail', 'Should eat and drink failed: ', 'potion');
-      }
+      displayLog(isSuccess ? 'passed' : 'fail', 'should eat and drink: ', 'potion');
 
       expect(isSuccess).toBeTruthy();
     },
