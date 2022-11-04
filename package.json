@@ -1,8 +1,6 @@
 {
   "name": "test e2e",
   "scripts": {
-    "start": "node ./launch.js",
-    "server": "cd ../../ && npm run dev",
     "test-e2e": "jest -i --colors"
   },
   "dependencies": {
