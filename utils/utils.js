@@ -7,8 +7,8 @@ const width = 800;
 const height = 400;
 // const width = 2400;
 // const height = 1200;
-let browser;
-let page;
+let browsers = [];
+let pages = [];
 let errorLists = []
 
 const isdebug = true;
@@ -108,11 +108,12 @@ const getDimensions = () => {
   };
 };
 
-const launchBrowser = async () => {
+const launchBrowser = async (isMulti) => {
   jest.setTimeout(totalTimeout);
-  displayLog('action', 'Start launch browser');
-  if (!browser) {
-    browser = await puppeteer.launch({
+  displayLog('action', 'Start launch browsers');
+  let browserCount = isMulti ? 2 : 1
+  for (let i = 0; i < browserCount; i++) {
+    const browser = await puppeteer.launch({
       // headless: !isdebug,
       headless: false,
       args: [
@@ -129,31 +130,39 @@ const launchBrowser = async () => {
       ],
       devtools: true,
     });
-  }
-  page = (await browser.pages())[0];
-  await page.setViewport({width, height});
+    browsers.push(browser)
 
-  setupErrorList(page)
+    const page = (await browser.pages())[0];
+    await page.setViewport({width, height});
+    setupErrorList(page)
+    pages.push(page)
+  }
 };
 
 const closeBrowser = async () => {
-  await browser.close();
+  browsers.forEach(async (browser) => {
+    await browser.close();
+  })
+  browsers = []
 };
 
-const getCurrentPage = () => {
-  return page;
+const getCurrentPage = (playerIndex = 0) => {
+  return pages[playerIndex];
 };
 
-const navigate = async url => {
-  if (!browser) {
-    throw Error('Cannot navigate without a browser!');
-  }
-  const context = browser.defaultBrowserContext();
+const navigate = async (url, playerIndex = 0) => {
+  // const browser = browsers[playerIndex]
+  const page = pages[playerIndex]
+  // if (!browser) {
+  //   throw Error('Cannot navigate without a browser!');
+  // }
+  // const context = browser.defaultBrowserContext();
 
-  const parsedUrl = new Url(url);
-  context.overridePermissions(url, ['microphone', 'camera']);
+  // const parsedUrl = new Url(url);
+  // context.overridePermissions(url, ['microphone', 'camera']);
 
   displayLog('action', `Going to url: ${url}`);
+
   await page.goto(url, {waitUntil: 'load', timeout: totalTimeout});
   // printLog('Complete to ' + url);
 
@@ -164,9 +173,10 @@ const navigate = async url => {
   // printLog('Granted:', granted
 };
 
-const enterScene = async url => {
-  await navigate(url);
-  await defineFunctions();
+const enterScene = async (url, playerIndex = 0) => {
+  await navigate(url, playerIndex);
+  const page = pages[playerIndex]
+  await defineFunctions(page);
   const isSceneLoaded = await page.evaluate(async () => {
     // @ts-ignore
     try {
@@ -189,7 +199,7 @@ const enterScene = async url => {
   displayLog('action', `Scene Loaded url: ${url}`);
 };
 
-const defineFunctions = async () => {
+const defineFunctions = async (page) => {
   // exposeFunction function does not work well
   // await page.exposeFunction('getAngle', getAngle)
   await page.evaluate(async () => {
