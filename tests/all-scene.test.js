@@ -3,15 +3,16 @@ const {
   enterScene,
   closeBrowser,
   displayLog,
+  getAppCountFromScene,
   resetErrorList,
   getErrorList,
   totalTimeout,
   getCurrentPage,
 } = require('../utils/utils');
 const sceneUrls = require('../../scenes/scenes.json');
-const request = require('request');
 
-describe.only('should load scene works', () => {
+describe('should load scene works', () => {
+  ``;
   beforeAll(async () => {
     await launchBrowser();
     // Todo: define custom functions here
@@ -55,25 +56,7 @@ describe.only('should load scene works', () => {
         }
       });
 
-      const appCount = await new Promise(function(resolve, reject) {
-        request(
-          `https://webaverse.github.io/scenes/${sceneUrl}`,
-          function(error, response, body) {
-            try {
-              debugger
-              if (!error && response.statusCode === 200) {
-                var importedJSON = JSON.parse(body);
-                resolve(importedJSON.objects ? importedJSON.objects.length : 0);
-              } else {
-                reject(0);
-              }
-            } catch (error) {
-              debugger
-              reject(0);
-            }
-          },
-        );
-      });
+      const appCount = await getAppCountFromScene(sceneUrl)
 
       displayLog('step', 'Should scene load works: ', 'Validation checking');
 
@@ -185,23 +168,7 @@ describe('should switch scene works', () => {
         }
       });
 
-      const appCount = await new Promise(function(resolve, reject) {
-        request(
-          `https://webaverse.github.io/scenes/${sceneUrl}`,
-          function(error, response, body) {
-            try {
-              if (!error && response.statusCode === 200) {
-                var importedJSON = JSON.parse(body);
-                resolve(importedJSON.objects ? importedJSON.objects.length : 0);
-              } else {
-                reject(0);
-              }
-            } catch (error) {
-              reject(0);
-            }
-          },
-        );
-      });
+      const appCount = await getAppCountFromScene(sceneUrl)
 
       displayLog('step', 'Should scene switch works: ', 'Validation checking');
 

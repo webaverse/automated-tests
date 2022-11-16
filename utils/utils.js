@@ -1,6 +1,8 @@
 const puppeteer = require('puppeteer');
 const chalk = require('chalk');
 const ExcelJS = require('exceljs');
+const fs = require('fs');
+const path = require("path");
 
 const width = 800;
 const height = 400;
@@ -100,7 +102,7 @@ const setupErrorList = async (page) => {
       const errorMsg = `${entry.text} ${entry.url}`
       const tempMsg = errorMsg.replace(/\s/g, '').toLowerCase()
       if (errorLists.indexOf(tempMsg) === -1) {
-        displayLog('error', errorMsg);
+        displayLog('error', entry.text, entry.url);
         errorLists.push(tempMsg)
       }
     }
@@ -253,6 +255,20 @@ const defineFunctions = async (page) => {
   });
 };
 
+const getAppCountFromScene = async (sceneUrl) => {
+  let appCount = 0
+  try {
+    const data = await fs.readFileSync(path.resolve(__dirname, `../../scenes/${sceneUrl}`))
+    const result = JSON.parse(data)
+    if (result && result.objects) {
+      appCount = result.objects.length
+    }
+  } catch (error) {
+    debugger
+  }
+  return appCount
+}
+
 module.exports = {
   totalTimeout,
   getCurrentPage,
@@ -261,6 +277,7 @@ module.exports = {
   closeBrowser,
   enterScene,
   printLog,
+  getAppCountFromScene,
   displayLog,
   getErrorList,
   resetErrorList
