@@ -8,7 +8,7 @@ const {
   getCurrentPage,
 } = require('../utils/utils');
 
-describe(
+describe.only(
   'should character movement',
   () => {
     beforeAll(async () => {
@@ -411,7 +411,7 @@ describe(
 );
 
 
-describe.only(
+describe(
   'multiplayer: should character movement',
   () => {
     beforeAll(async () => {

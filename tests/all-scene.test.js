@@ -11,8 +11,7 @@ const {
 const sceneUrls = require('../../scenes/scenes.json');
 const request = require('request');
 
-describe('should load scene works', () => {
-  ``;
+describe.only('should load scene works', () => {
   beforeAll(async () => {
     await launchBrowser();
     // Todo: define custom functions here
@@ -61,6 +60,7 @@ describe('should load scene works', () => {
           `https://webaverse.github.io/scenes/${sceneUrl}`,
           function(error, response, body) {
             try {
+              debugger
               if (!error && response.statusCode === 200) {
                 var importedJSON = JSON.parse(body);
                 resolve(importedJSON.objects ? importedJSON.objects.length : 0);
@@ -68,6 +68,7 @@ describe('should load scene works', () => {
                 reject(0);
               }
             } catch (error) {
+              debugger
               reject(0);
             }
           },

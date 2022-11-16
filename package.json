@@ -6,7 +6,8 @@
   "dependencies": {
     "child_process": "^1.0.2",
     "kill-port": "^2.0.1",
-    "swc": "^1.0.11"
+    "swc": "^1.0.11",
+    "excel4node": "^1.8.0"
   },
   "devDependencies": {
     "@types/expect-puppeteer": "^5.0.1",

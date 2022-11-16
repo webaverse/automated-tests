@@ -1,8 +1,7 @@
 const puppeteer = require('puppeteer');
 const chalk = require('chalk');
-const {Url} = require('url');
+const ExcelJS = require('exceljs');
 
-const totalTimeout = 600 * 1000;
 const width = 800;
 const height = 400;
 // const width = 2400;
@@ -10,6 +9,7 @@ const height = 400;
 let browsers = [];
 let pages = [];
 let errorLists = []
+let totalTimeout = 60000
 
 const isdebug = true;
 
@@ -21,7 +21,21 @@ const printLog = (text, error) => {
   }
 };
 
-const displayLog = (type, message, message2 = '') => {
+
+let workbook
+let worksheet
+
+const setupExcel = async () => {
+  workbook = new ExcelJS.Workbook();
+  worksheet = workbook.addWorksheet('My Sheet');
+  worksheet.columns = [
+    { header: 'type', key: 'type', width: 10 },
+    { header: 'Message', key: 'message', width: 80 },
+    { header: 'Message 2', key: 'message2', width: 40}
+  ];
+}
+
+const displayLog = async (type, message, message2 = '') => {
   if (!chalk.supportsColor) {
     console.log(type, message, message2);
   }
@@ -49,8 +63,20 @@ const displayLog = (type, message, message2 = '') => {
       output = `${chalk.reset.white.bgRedBright.bold(' FAILED ')} ${message} ${chalk.underline.redBright(message2)}`;
     }
     process.stderr.write(`${output}\n`);
+    if (worksheet && workbook
+      && (type == 'section'
+      || type == 'error'
+      || type == 'browsererror'
+      || type == 'success'
+      || type == 'passed'
+      || type == 'fail')
+      ) {
+      worksheet.addRow({type, message, message2});
+      await workbook.xlsx.writeFile("./test.xlsx");
+    }
   }
 };
+
 
 const throwErrors = async (text, isQuit) => {
   if (isQuit) await closeBrowser();
@@ -137,6 +163,7 @@ const launchBrowser = async (isMulti) => {
     setupErrorList(page)
     pages.push(page)
   }
+  setupExcel()
 };
 
 const closeBrowser = async () => {
