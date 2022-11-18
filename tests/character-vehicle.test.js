@@ -15,7 +15,7 @@ const {
         // 	window.todo = () => {}
         // })
         await enterScene(
-            `https://local.webaverse.com/?src=./packages/automated-tests/scenes/test-e2e-vehicle.scn`,
+            `https://local.webaverse.com/?src=./a/automated-tests/scenes/test-e2e-vehicle.scn`,
         );
         const page = getCurrentPage();
         await page.click('#root');

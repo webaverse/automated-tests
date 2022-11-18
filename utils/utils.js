@@ -11,9 +11,10 @@ const height = 400;
 let browsers = [];
 let pages = [];
 let errorLists = []
-let totalTimeout = 60000
+let totalTimeout = 3 * 60 * 1000
 
 const isdebug = true;
+const testFilePath = './test.xlsx'
 
 const printLog = (text, error) => {
   if (isdebug) {
@@ -26,15 +27,44 @@ const printLog = (text, error) => {
 
 let workbook
 let worksheet
+let currentScene
 
-const setupExcel = async () => {
+const setupExcel = async (sheetName) => {
   workbook = new ExcelJS.Workbook();
-  worksheet = workbook.addWorksheet('My Sheet');
-  worksheet.columns = [
-    { header: 'type', key: 'type', width: 10 },
-    { header: 'Message', key: 'message', width: 80 },
-    { header: 'Message 2', key: 'message2', width: 40}
-  ];
+  try {
+    if (fs.existsSync(testFilePath)) {
+      await workbook.xlsx.readFile(testFilePath)
+      const oldSheet = workbook.getWorksheet(sheetName);
+      if (oldSheet) workbook.removeWorksheet(oldSheet.id);
+    }
+  } catch (error) {
+    debugger
+  }
+  try {
+    worksheet = workbook.addWorksheet(sheetName)
+    worksheet.columns = [
+      { header: 'Scene', key: 'scene', width: 10 },
+      { header: 'type', key: 'type', width: 10 },
+      { header: 'Message', key: 'message', width: 80 },
+      { header: 'Message', key: 'message2', width: 40 }
+    ];
+  } catch (error) {
+    debugger
+  }
+}
+
+
+
+const startExcel = async (str) => {
+  currentScene = str
+}
+
+const saveExcel = async (str) => {
+  try {
+    await workbook.xlsx.writeFile(testFilePath);
+  } catch (error) {
+    debugger
+  }
 }
 
 const displayLog = async (type, message, message2 = '') => {
@@ -67,14 +97,18 @@ const displayLog = async (type, message, message2 = '') => {
     process.stderr.write(`${output}\n`);
     if (worksheet && workbook
       && (type == 'section'
-      || type == 'error'
-      || type == 'browsererror'
-      || type == 'success'
-      || type == 'passed'
-      || type == 'fail')
-      ) {
-      worksheet.addRow({type, message, message2});
-      await workbook.xlsx.writeFile("./test.xlsx");
+        || type == 'error'
+        || type == 'browsererror'
+        || type == 'success'
+        || type == 'passed'
+        || type == 'fail')
+    ) {
+      try {
+        if (!message2) message2 = ""
+        worksheet.addRow({ scene: currentScene, type, message, message2 });
+      } catch (error) {
+        debugger
+      }
     }
   }
 };
@@ -116,17 +150,29 @@ const setupErrorList = async (page) => {
         displayLog('error', errorMsg);
         errorLists.push(tempMsg)
       }
-    } else if (e.type() === 'warning') {
-      const errorMsg = e.text()
-      if (errorMsg.includes('error loading')) {
-        const tempMsg = errorMsg.replace(/\s/g, '').toLowerCase()
-        if (errorLists.indexOf(tempMsg) === -1) {
-          displayLog('error', errorMsg);
-          errorLists.push(tempMsg)
-        }
-      }
     }
   });
+
+  await page.exposeFunction('browserError', error => {
+    const errorMsg = `${error.msg} ${error.url}`
+    const tempMsg = errorMsg.replace(/\s/g, '').toLowerCase()
+    if (errorLists.indexOf(tempMsg) === -1) {
+      displayLog('error', error.msg, error.url);
+      errorLists.push(tempMsg)
+    }
+  });
+
+  await page.evaluate(async () => {
+    // @ts-ignore
+    try {
+      window.onerror=function(msg, url, line){
+        window.browserError({msg, url, line})
+        return true;
+      }
+    } catch (error) {
+    }
+  });
+  
 }
 
 const getDimensions = () => {
@@ -161,11 +207,10 @@ const launchBrowser = async (isMulti) => {
     browsers.push(browser)
 
     const page = (await browser.pages())[0];
-    await page.setViewport({width, height});
+    await page.setViewport({ width, height });
     setupErrorList(page)
     pages.push(page)
   }
-  setupExcel()
 };
 
 const closeBrowser = async () => {
@@ -192,7 +237,7 @@ const navigate = async (url, playerIndex = 0) => {
 
   displayLog('action', `Going to url: ${url}`);
 
-  await page.goto(url, {waitUntil: 'load', timeout: totalTimeout});
+  await page.goto(url, { waitUntil: 'load', timeout: totalTimeout });
   // printLog('Complete to ' + url);
 
   // const granted = await page.evaluate(async () => {
@@ -206,22 +251,23 @@ const enterScene = async (url, playerIndex = 0) => {
   await navigate(url, playerIndex);
   const page = pages[playerIndex]
   await defineFunctions(page);
-  const isSceneLoaded = await page.evaluate(async () => {
+  const isSceneLoaded = await page.evaluate(async (totalTimeout) => {
     // @ts-ignore
     try {
       if (!window?.globalWebaverse) return;
       await window.globalWebaverse.webaverse?.waitForLoad();
       await window.globalWebaverse.universe?.isSceneLoaded();
       await window.globalWebaverse.universe?.waitForSceneLoaded();
+      debugger
       return await window.waitForUntil(() => {
         const avatar = window.globalWebaverse.playersManager?.localPlayer?.avatar;
         return (avatar?.model && avatar?.model?.visible) || (avatar?.crunchedModel && avatar?.crunchedModel?.visible);
-      }, 180000);
+      }, totalTimeout);
     } catch (error) {
       console.error('error loading ', error);
       return false;
     }
-  });
+  }, totalTimeout);
   if (!isSceneLoaded) {
     await throwErrors('Cannot load the current scene!', true);
   }
@@ -276,6 +322,9 @@ module.exports = {
   launchBrowser,
   closeBrowser,
   enterScene,
+  startExcel,
+  saveExcel,
+  setupExcel,
   printLog,
   getAppCountFromScene,
   displayLog,

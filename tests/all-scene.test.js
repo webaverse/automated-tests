@@ -3,6 +3,9 @@ const {
   enterScene,
   closeBrowser,
   displayLog,
+  setupExcel,
+  saveExcel,
+  startExcel,
   getAppCountFromScene,
   resetErrorList,
   getErrorList,
@@ -11,10 +14,10 @@ const {
 } = require('../utils/utils');
 const sceneUrls = require('../../scenes/scenes.json');
 
-describe('should load scene works', () => {
-  ``;
+describe.only('should load scene works', () => {
   beforeAll(async () => {
     await launchBrowser();
+    setupExcel("all-scene");
     // Todo: define custom functions here
     // await page.evaluate(async () => {
     // 	window.todo = () => {}
@@ -28,174 +31,183 @@ describe('should load scene works', () => {
   test.each(sceneUrls)(
     'should scene load works %s',
     async sceneUrl => {
-      displayLog('section', 'Should scene load works started: ', `${sceneUrl}`);
-      
-      await enterScene(`https://local.webaverse.com/?src=/packages/scenes/${sceneUrl}`);
-      
-      const page = getCurrentPage();
+      try {
+        startExcel(sceneUrl);
+        const page = getCurrentPage();
+        
+        await page.waitForTimeout(3000);
 
-      resetErrorList();
+        displayLog('section', 'Should scene load works started: ', `${sceneUrl}`);
+      
+        await enterScene(`https://local.webaverse.com/?src=/packages/scenes/${sceneUrl}`);
 
-      const result = await page.evaluate(async () => {
-        // @ts-ignore
-        try {
-          const loadedApps =
-            window.globalWebaverse.world.appManager.getApps();
-          const loadedAppCount = loadedApps.length;
+        resetErrorList();
+
+        const result = await page.evaluate(async () => {
+          // @ts-ignore
+          try {
+            const loadedApps =
+              window.globalWebaverse.world.appManager.getApps();
+            const loadedAppCount = loadedApps.length;
           // add some validation code here
-          return {
-            isSceneLoaded: true,
-            loadedAppCount,
-          };
-        } catch (error) {
-          console.error('error loading ', error);
-          return {
-            isSceneLoaded: false,
-            loadedAppCount: 0,
-          };
-        }
-      });
-
-      const appCount = await getAppCountFromScene(sceneUrl)
-
-      displayLog('step', 'Should scene load works: ', 'Validation checking');
-
-      const errorLists = getErrorList()
-
-      if (result.isSceneLoaded && errorLists.length === 0) {
-        displayLog('success', 'Screen loaded properly');
-      } else {
-        displayLog('error', 'Screen not properly loaded, Please check out the browser console');
-      }
-
-      if (result.loadedAppCount !== appCount) {
-        displayLog('error', 'Child apps not fully loaded: ', `${result.loadedAppCount} of ${appCount}`);
-      } else {
-        displayLog('success', 'Child apps fully loaded: ', `${result.loadedAppCount} of ${appCount}`);
-      }
-
-      const isSuccess = result.isSceneLoaded && result.loadedAppCount === appCount && errorLists.length === 0;
-
-      if (isSuccess) {
-        displayLog('passed', 'Scene loaded successfully: ', `${sceneUrl}`);
-      } else {
-        displayLog('fail', 'Scene loaded failed: ', `${sceneUrl}`);
-      }
-
-      expect(isSuccess).toBeTruthy();
-    },
-    totalTimeout * 10,
-  );
-});
-
-describe('should switch scene works', () => {
-  ``;
-  beforeAll(async () => {
-    await launchBrowser();
-    // Todo: define custom functions here
-    // await page.evaluate(async () => {
-    // 	window.todo = () => {}
-    // })
-    await enterScene('https://local.webaverse.com/');
-  }, totalTimeout);
-
-  afterAll(async () => {
-    await closeBrowser();
-  }, totalTimeout);
-
-  test.each(sceneUrls)(
-    'should scene switch works %s',
-    async sceneUrl => {
-      displayLog('section', 'Should scene switch works started: ', `${sceneUrl}`);
-      const page = getCurrentPage();
-
-      resetErrorList();
-
-      displayLog('step', 'Should scene switch works: ', 'Open scene list');
-      await page.evaluate(async sceneUrl => {
-        document.querySelector('._button_1fev9_13').click();
-        console.log(`======================= Going to Open ${sceneUrl} =======================`);
-      }, sceneUrl);
-
-      const mousePos = await page.evaluate(async sceneUrl => {
-        const nodeLists = document.querySelectorAll('div._room_1fev9_22');
-        let mouseX, mouseY;
-        nodeLists.forEach(nodeElement => {
-          const url = nodeElement.querySelector('div').innerHTML;
-          const lastIndex = url.lastIndexOf('/');
-          const name = url.slice(lastIndex + 1);
-          if (sceneUrl === name) {
-            // scroll to view
-            nodeElement.scrollIntoView();
-            // mouse position
-            const rect = nodeElement.getBoundingClientRect();
-            mouseX = (rect.left + rect.right) / 2;
-            mouseY = (rect.top + rect.bottom) / 2;
+            return {
+              isSceneLoaded: true,
+              loadedAppCount,
+            };
+          } catch (error) {
+            console.error('error loading ', error);
+            return {
+              isSceneLoaded: false,
+              loadedAppCount: 0,
+            };
           }
         });
-        return {
-          x: mouseX,
-          y: mouseY,
-        };
-      }, sceneUrl);
 
-      displayLog('step', 'Should scene switch works: ', 'Move mouse to list and click');
+        const appCount = await getAppCountFromScene(sceneUrl)
 
-      await page.mouse.move(mousePos.x, mousePos.y);
-      await page.waitForTimeout(500);
-      await page.mouse.click(mousePos.x, mousePos.y);
-      await page.waitForTimeout(500);
+        displayLog('step', 'Should scene load works: ', 'Validation checking');
 
-      const result = await page.evaluate(async () => {
-        // @ts-ignore
-        try {
-          await window.globalWebaverse.webaverse?.waitForLoad();
-          await window.globalWebaverse.universe?.waitForSceneLoaded();
-          const loadedApps =
-            window.globalWebaverse.world.appManager.getApps();
-          const loadedAppCount = loadedApps.length;
-          // add some validation code here
-          return {
-            isSceneLoaded: true,
-            loadedAppCount,
-          };
-        } catch (error) {
-          console.error('error loading ', error);
-          return {
-            isSceneLoaded: false,
-            loadedAppCount: 0,
-          };
+        const errorLists = getErrorList()
+
+        if (result.isSceneLoaded && errorLists.length === 0) {
+          displayLog('success', 'Screen loaded properly');
+        } else {
+          displayLog('error', 'Screen not properly loaded, Please check out the browser console');
         }
-      });
 
-      const appCount = await getAppCountFromScene(sceneUrl)
+        if (result.loadedAppCount !== appCount) {
+          displayLog('error', 'Child apps not fully loaded: ', `${result.loadedAppCount} of ${appCount}`);
+        } else {
+          displayLog('success', 'Child apps fully loaded: ', `${result.loadedAppCount} of ${appCount}`);
+        }
 
-      displayLog('step', 'Should scene switch works: ', 'Validation checking');
+        const isSuccess = result.isSceneLoaded && result.loadedAppCount === appCount && errorLists.length === 0;
 
-      const errorLists = getErrorList()
+        if (isSuccess) {
+          displayLog('passed', 'Scene loaded successfully: ', `${sceneUrl}`);
+        } else {
+          displayLog('fail', 'Scene loaded failed: ', `${sceneUrl}`);
+        }
 
-      if (result.isSceneLoaded && errorLists.length === 0) {
-        displayLog('success', 'Screen loaded properly');
-      } else {
-        displayLog('error', 'Screen not properly loaded, Please check out the browser console');
+        expect(isSuccess).toBeTruthy();
+      } catch (error) {
+        displayLog('fail', `Scene loaded failed: ${error.message}: `, `${sceneUrl}`);
       }
 
-      if (result.loadedAppCount !== appCount) {
-        displayLog('error', 'Child apps not fully loaded: ', `${result.loadedAppCount} of ${appCount}`);
-      } else {
-        displayLog('success', 'Child apps fully loaded: ', `${result.loadedAppCount} of ${appCount}`);
-      }
-
-      const isSuccess = result.isSceneLoaded && result.loadedAppCount === appCount && errorLists.length === 0;
-
-      if (isSuccess) {
-        displayLog('passed', 'Scene loaded successfully: ', `${sceneUrl}`);
-      } else {
-        displayLog('fail', 'Scene loaded failed: ', `${sceneUrl}`);
-      }
-
-      expect(isSuccess).toBeTruthy();
+      saveExcel(sceneUrl);
     },
-    totalTimeout * 10,
+    totalTimeout,
   );
 });
+
+// describe('should switch scene works', () => {
+//   ``;
+//   beforeAll(async () => {
+//     await launchBrowser();
+//     // Todo: define custom functions here
+//     // await page.evaluate(async () => {
+//     // 	window.todo = () => {}
+//     // })
+//     await enterScene('https://local.webaverse.com/');
+//   }, totalTimeout);
+
+//   afterAll(async () => {
+//     await closeBrowser();
+//   }, totalTimeout);
+
+//   test.each(sceneUrls)(
+//     'should scene switch works %s',
+//     async sceneUrl => {
+//       displayLog('section', 'Should scene switch works started: ', `${sceneUrl}`);
+//       const page = getCurrentPage();
+
+//       resetErrorList();
+
+//       displayLog('step', 'Should scene switch works: ', 'Open scene list');
+//       await page.evaluate(async sceneUrl => {
+//         document.querySelector('._button_1fev9_13').click();
+//         console.log(`======================= Going to Open ${sceneUrl} =======================`);
+//       }, sceneUrl);
+
+//       const mousePos = await page.evaluate(async sceneUrl => {
+//         const nodeLists = document.querySelectorAll('div._room_1fev9_22');
+//         let mouseX, mouseY;
+//         nodeLists.forEach(nodeElement => {
+//           const url = nodeElement.querySelector('div').innerHTML;
+//           const lastIndex = url.lastIndexOf('/');
+//           const name = url.slice(lastIndex + 1);
+//           if (sceneUrl === name) {
+//             // scroll to view
+//             nodeElement.scrollIntoView();
+//             // mouse position
+//             const rect = nodeElement.getBoundingClientRect();
+//             mouseX = (rect.left + rect.right) / 2;
+//             mouseY = (rect.top + rect.bottom) / 2;
+//           }
+//         });
+//         return {
+//           x: mouseX,
+//           y: mouseY,
+//         };
+//       }, sceneUrl);
+
+//       displayLog('step', 'Should scene switch works: ', 'Move mouse to list and click');
+
+//       await page.mouse.move(mousePos.x, mousePos.y);
+//       await page.waitForTimeout(500);
+//       await page.mouse.click(mousePos.x, mousePos.y);
+//       await page.waitForTimeout(500);
+
+//       const result = await page.evaluate(async () => {
+//         // @ts-ignore
+//         try {
+//           await window.globalWebaverse.webaverse?.waitForLoad();
+//           await window.globalWebaverse.universe?.waitForSceneLoaded();
+//           const loadedApps =
+//             window.globalWebaverse.world.appManager.getApps();
+//           const loadedAppCount = loadedApps.length;
+//           // add some validation code here
+//           return {
+//             isSceneLoaded: true,
+//             loadedAppCount,
+//           };
+//         } catch (error) {
+//           console.error('error loading ', error);
+//           return {
+//             isSceneLoaded: false,
+//             loadedAppCount: 0,
+//           };
+//         }
+//       });
+
+//       const appCount = await getAppCountFromScene(sceneUrl)
+
+//       displayLog('step', 'Should scene switch works: ', 'Validation checking');
+
+//       const errorLists = getErrorList()
+
+//       if (result.isSceneLoaded && errorLists.length === 0) {
+//         displayLog('success', 'Screen loaded properly');
+//       } else {
+//         displayLog('error', 'Screen not properly loaded, Please check out the browser console');
+//       }
+
+//       if (result.loadedAppCount !== appCount) {
+//         displayLog('error', 'Child apps not fully loaded: ', `${result.loadedAppCount} of ${appCount}`);
+//       } else {
+//         displayLog('success', 'Child apps fully loaded: ', `${result.loadedAppCount} of ${appCount}`);
+//       }
+
+//       const isSuccess = result.isSceneLoaded && result.loadedAppCount === appCount && errorLists.length === 0;
+
+//       if (isSuccess) {
+//         displayLog('passed', 'Scene loaded successfully: ', `${sceneUrl}`);
+//       } else {
+//         displayLog('fail', 'Scene loaded failed: ', `${sceneUrl}`);
+//       }
+
+//       expect(isSuccess).toBeTruthy();
+//     },
+//     totalTimeout,
+//   );
+// });
