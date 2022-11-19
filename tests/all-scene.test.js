@@ -5,14 +5,16 @@ const {
   displayLog,
   setupExcel,
   saveExcel,
-  startExcel,
+  setCurrentScene,
   getAppCountFromScene,
-  resetErrorList,
   getErrorList,
   totalTimeout,
   getCurrentPage,
 } = require('../utils/utils');
 const sceneUrls = require('../../scenes/scenes.json');
+
+let currntTest = ''
+let recentTestPassed = ''
 
 describe.only('should load scene works', () => {
   beforeAll(async () => {
@@ -28,20 +30,24 @@ describe.only('should load scene works', () => {
     await closeBrowser();
   }, totalTimeout);
 
-  test.each(sceneUrls)(
+  test.each(sceneUrls) (
     'should scene load works %s',
     async sceneUrl => {
       try {
-        startExcel(sceneUrl);
+        //Todo: check timeout case
+        if (recentTestPassed !== currntTest) {
+          saveExcel(sceneUrl)
+          displayLog('fail', 'Scene loaded failed timeout: ', `${currntTest}`)
+        }
+
+        currntTest = sceneUrl
+        setCurrentScene(sceneUrl)
+
         const page = getCurrentPage();
-        
-        await page.waitForTimeout(3000);
 
         displayLog('section', 'Should scene load works started: ', `${sceneUrl}`);
       
         await enterScene(`https://local.webaverse.com/?src=/packages/scenes/${sceneUrl}`);
-
-        resetErrorList();
 
         const result = await page.evaluate(async () => {
           // @ts-ignore
@@ -55,7 +61,7 @@ describe.only('should load scene works', () => {
               loadedAppCount,
             };
           } catch (error) {
-            console.error('error loading ', error);
+            console.error(error);
             return {
               isSceneLoaded: false,
               loadedAppCount: 0,
@@ -88,13 +94,13 @@ describe.only('should load scene works', () => {
         } else {
           displayLog('fail', 'Scene loaded failed: ', `${sceneUrl}`);
         }
-
         expect(isSuccess).toBeTruthy();
       } catch (error) {
-        displayLog('fail', `Scene loaded failed: ${error.message}: `, `${sceneUrl}`);
+        expect(false).toBeTruthy();
       }
 
-      saveExcel(sceneUrl);
+      saveExcel(sceneUrl)
+      recentTestPassed = sceneUrl
     },
     totalTimeout,
   );

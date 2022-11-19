@@ -14,6 +14,10 @@ let errorLists = []
 let totalTimeout = 3 * 60 * 1000
 
 const isdebug = true;
+
+let workbook
+let worksheet
+let currentScene
 const testFilePath = './test.xlsx'
 
 const printLog = (text, error) => {
@@ -24,11 +28,6 @@ const printLog = (text, error) => {
   }
 };
 
-
-let workbook
-let worksheet
-let currentScene
-
 const setupExcel = async (sheetName) => {
   workbook = new ExcelJS.Workbook();
   try {
@@ -38,7 +37,7 @@ const setupExcel = async (sheetName) => {
       if (oldSheet) workbook.removeWorksheet(oldSheet.id);
     }
   } catch (error) {
-    debugger
+    console.error(error)
   }
   try {
     worksheet = workbook.addWorksheet(sheetName)
@@ -49,21 +48,21 @@ const setupExcel = async (sheetName) => {
       { header: 'Message', key: 'message2', width: 40 }
     ];
   } catch (error) {
-    debugger
+    console.error(error)
   }
 }
 
-
-
-const startExcel = async (str) => {
+const setCurrentScene = async (str) => {
   currentScene = str
+  resetErrorList();
 }
 
 const saveExcel = async (str) => {
   try {
+    if (currentScene != str) return
     await workbook.xlsx.writeFile(testFilePath);
   } catch (error) {
-    debugger
+    console.error(error)
   }
 }
 
@@ -107,7 +106,7 @@ const displayLog = async (type, message, message2 = '') => {
         if (!message2) message2 = ""
         worksheet.addRow({ scene: currentScene, type, message, message2 });
       } catch (error) {
-        debugger
+        console.error(error)
       }
     }
   }
@@ -258,7 +257,6 @@ const enterScene = async (url, playerIndex = 0) => {
       await window.globalWebaverse.webaverse?.waitForLoad();
       await window.globalWebaverse.universe?.isSceneLoaded();
       await window.globalWebaverse.universe?.waitForSceneLoaded();
-      debugger
       return await window.waitForUntil(() => {
         const avatar = window.globalWebaverse.playersManager?.localPlayer?.avatar;
         return (avatar?.model && avatar?.model?.visible) || (avatar?.crunchedModel && avatar?.crunchedModel?.visible);
@@ -322,7 +320,7 @@ module.exports = {
   launchBrowser,
   closeBrowser,
   enterScene,
-  startExcel,
+  setCurrentScene,
   saveExcel,
   setupExcel,
   printLog,
