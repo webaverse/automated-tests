@@ -19,7 +19,7 @@ let recentTestPassed = ''
 describe.only('should load scene works', () => {
   beforeAll(async () => {
     await launchBrowser();
-    setupExcel("all-scene");
+    await setupExcel("all-scene");
     // Todo: define custom functions here
     // await page.evaluate(async () => {
     // 	window.todo = () => {}
@@ -34,10 +34,11 @@ describe.only('should load scene works', () => {
     'should scene load works %s',
     async sceneUrl => {
       try {
+        let isSuccess = false
         //Todo: check timeout case
         if (recentTestPassed !== currntTest) {
-          saveExcel(sceneUrl)
           displayLog('fail', 'Scene loaded failed timeout: ', `${currntTest}`)
+          saveExcel(currntTest)
         }
 
         currntTest = sceneUrl
@@ -87,20 +88,20 @@ describe.only('should load scene works', () => {
           displayLog('success', 'Child apps fully loaded: ', `${result.loadedAppCount} of ${appCount}`);
         }
 
-        const isSuccess = result.isSceneLoaded && result.loadedAppCount === appCount && errorLists.length === 0;
+        isSuccess = result.isSceneLoaded && result.loadedAppCount === appCount && errorLists.length === 0;
 
         if (isSuccess) {
           displayLog('passed', 'Scene loaded successfully: ', `${sceneUrl}`);
         } else {
           displayLog('fail', 'Scene loaded failed: ', `${sceneUrl}`);
         }
-        expect(isSuccess).toBeTruthy();
       } catch (error) {
-        expect(false).toBeTruthy();
+        console.error(error)
       }
 
       saveExcel(sceneUrl)
       recentTestPassed = sceneUrl
+      expect(isSuccess).toBeTruthy();
     },
     totalTimeout,
   );

@@ -18,6 +18,8 @@ const isdebug = true;
 let workbook
 let worksheet
 let currentScene
+let pastRowNum = -1
+let currentRowNum = 0
 const testFilePath = './test.xlsx'
 
 const printLog = (text, error) => {
@@ -42,10 +44,10 @@ const setupExcel = async (sheetName) => {
   try {
     worksheet = workbook.addWorksheet(sheetName)
     worksheet.columns = [
-      { header: 'Scene', key: 'scene', width: 10 },
+      { header: 'Scene', key: 'scene', width: 20 },
       { header: 'type', key: 'type', width: 10 },
       { header: 'Message', key: 'message', width: 80 },
-      { header: 'Message', key: 'message2', width: 40 }
+      { header: 'Message', key: 'message2', width: 80 }
     ];
   } catch (error) {
     console.error(error)
@@ -60,9 +62,50 @@ const setCurrentScene = async (str) => {
 const saveExcel = async (str) => {
   try {
     if (currentScene != str) return
+    if (pastRowNum != currentRowNum) {
+      worksheet.mergeCells(`A${pastRowNum}:A${currentRowNum}`);
+      worksheet.getCell(`A${pastRowNum}`).alignment = { horizontal:'center', vertical: 'middle'};
+      pastRowNum = currentRowNum + 1
+    }
     await workbook.xlsx.writeFile(testFilePath);
   } catch (error) {
     console.error(error)
+  }
+}
+
+const updateExcelRow = (type, message, message2) => {
+  if (worksheet && workbook
+    && (type == 'section'
+      || type == 'error'
+      || type == 'success'
+      || type == 'passed'
+      || type == 'fail')
+  ) {
+    try {
+      let font = {color: {argb: "00000000"}}
+      let fill = {type: 'pattern', pattern:'solid', bgColor: { argb: 'ffffff' }, fgColor: {argb: "ffffff"}}
+
+      if (type == 'setcion') {
+
+      } else if (type == 'error') {
+        font = {color: {argb: "00ff0000"}}
+      } else if (type == 'success') {
+        font = {color: {argb: "0000ff00"}}
+      } else if (type == 'passed') {
+        fill = {type: 'pattern', pattern:'solid', bgColor: { argb: '00ff00' }, fgColor: {argb: "00ff00"}}
+      } else if (type == 'fail') {
+        fill = {type: 'pattern', pattern:'solid', bgColor: { argb: 'ff0000' }, fgColor: {argb: "ff0000"}}
+      }
+      
+      if (!message2) message2 = ""
+      const newRow = worksheet.addRow({ scene: currentScene, type, message, message2 })
+      currentRowNum = newRow._number
+      newRow._cells[1].fill = fill
+      newRow._cells[1].font = font
+      if (pastRowNum == -1) pastRowNum = currentRowNum
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
 
@@ -94,21 +137,7 @@ const displayLog = async (type, message, message2 = '') => {
       output = `${chalk.reset.white.bgRedBright.bold(' FAILED ')} ${message} ${chalk.underline.redBright(message2)}`;
     }
     process.stderr.write(`${output}\n`);
-    if (worksheet && workbook
-      && (type == 'section'
-        || type == 'error'
-        || type == 'browsererror'
-        || type == 'success'
-        || type == 'passed'
-        || type == 'fail')
-    ) {
-      try {
-        if (!message2) message2 = ""
-        worksheet.addRow({ scene: currentScene, type, message, message2 });
-      } catch (error) {
-        console.error(error)
-      }
-    }
+    updateExcelRow(type, message, message2)
   }
 };
 
