@@ -173,9 +173,10 @@ const setupErrorList = async (page) => {
   page.on('console', async e => {
     if (e.type() === 'error') {
       const errorMsg = e.text()
+      const errorLocation = e.location()
       const tempMsg = errorMsg.replace(/\s/g, '').toLowerCase()
       if (errorLists.indexOf(tempMsg) === -1) {
-        displayLog('error', errorMsg);
+        displayLog('error', errorMsg, errorLocation.url ? errorLocation.url : '');
         errorLists.push(tempMsg)
       }
     }
@@ -337,7 +338,7 @@ const getAppCountFromScene = async (sceneUrl) => {
       appCount = result.objects.length
     }
   } catch (error) {
-    debugger
+    console.error(error)
   }
   return appCount
 }
