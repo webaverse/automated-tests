@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 const chalk = require('chalk');
-const ExcelJS = require('exceljs');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const fs = require('fs');
 const path = require("path");
 
@@ -11,16 +11,14 @@ const height = 400;
 let browsers = [];
 let pages = [];
 let errorLists = []
-let totalTimeout = 3 * 60 * 1000
+let totalTimeout = 30 * 60 * 1000
 
 const isdebug = true;
 
-let workbook
-let worksheet
+let csvWriter = null
+let csvRecords = []
 let currentScene
-let pastRowNum = -1
-let currentRowNum = 0
-const testFilePath = './test.xlsx'
+const testFilePath = './test.csv'
 
 const printLog = (text, error) => {
   if (isdebug) {
@@ -30,25 +28,24 @@ const printLog = (text, error) => {
   }
 };
 
-const setupExcel = async (sheetName) => {
-  workbook = new ExcelJS.Workbook();
+const setupExcel = async () => {
   try {
     if (fs.existsSync(testFilePath)) {
-      await workbook.xlsx.readFile(testFilePath)
-      const oldSheet = workbook.getWorksheet(sheetName);
-      if (oldSheet) workbook.removeWorksheet(oldSheet.id);
+      fs.unlinkSync(testFilePath);
     }
   } catch (error) {
     console.error(error)
   }
   try {
-    worksheet = workbook.addWorksheet(sheetName)
-    worksheet.columns = [
-      { header: 'Scene', key: 'scene', width: 20 },
-      { header: 'type', key: 'type', width: 10 },
-      { header: 'Message', key: 'message', width: 80 },
-      { header: 'Message', key: 'message2', width: 80 }
-    ];
+    csvWriter = createCsvWriter({
+      path: testFilePath,
+      header: [
+        { title: 'Scene', id: 'scene'},
+        { title: 'type', id: 'type'},
+        { title: 'Message', id: 'message'},
+        { title: 'Message', id: 'message2'}
+      ]
+    });
   } catch (error) {
     console.error(error)
   }
@@ -62,19 +59,15 @@ const setCurrentScene = async (str) => {
 const saveExcel = async (str) => {
   try {
     if (currentScene != str) return
-    if (pastRowNum != currentRowNum) {
-      worksheet.mergeCells(`A${pastRowNum}:A${currentRowNum}`);
-      worksheet.getCell(`A${pastRowNum}`).alignment = { horizontal:'center', vertical: 'middle'};
-      pastRowNum = currentRowNum + 1
-    }
-    await workbook.xlsx.writeFile(testFilePath);
+    await csvWriter.writeRecords(csvRecords)
+    csvRecords = []
   } catch (error) {
     console.error(error)
   }
 }
 
 const updateExcelRow = (type, message, message2) => {
-  if (worksheet && workbook
+  if (csvWriter
     && (type == 'section'
       || type == 'error'
       || type == 'success'
@@ -82,27 +75,12 @@ const updateExcelRow = (type, message, message2) => {
       || type == 'fail')
   ) {
     try {
-      let font = {color: {argb: "00000000"}}
-      let fill = {type: 'pattern', pattern:'solid', bgColor: { argb: 'ffffff' }, fgColor: {argb: "ffffff"}}
-
-      if (type == 'setcion') {
-
-      } else if (type == 'error') {
-        font = {color: {argb: "00ff0000"}}
-      } else if (type == 'success') {
-        font = {color: {argb: "0000ff00"}}
-      } else if (type == 'passed') {
-        fill = {type: 'pattern', pattern:'solid', bgColor: { argb: '00ff00' }, fgColor: {argb: "00ff00"}}
-      } else if (type == 'fail') {
-        fill = {type: 'pattern', pattern:'solid', bgColor: { argb: 'ff0000' }, fgColor: {argb: "ff0000"}}
-      }
-      
-      if (!message2) message2 = ""
-      const newRow = worksheet.addRow({ scene: currentScene, type, message, message2 })
-      currentRowNum = newRow._number
-      newRow._cells[1].fill = fill
-      newRow._cells[1].font = font
-      if (pastRowNum == -1) pastRowNum = currentRowNum
+      csvRecords.push({
+        scene: currentScene,
+        type,
+        message,
+        message2
+      })
     } catch (error) {
       console.error(error)
     }
@@ -139,8 +117,7 @@ const displayLog = async (type, message, message2 = '') => {
     process.stderr.write(`${output}\n`);
     updateExcelRow(type, message, message2)
   }
-};
-
+}
 
 const throwErrors = async (text, isQuit) => {
   if (isQuit) await closeBrowser();

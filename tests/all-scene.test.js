@@ -19,7 +19,7 @@ let recentTestPassed = ''
 describe.only('should load scene works', () => {
   beforeAll(async () => {
     await launchBrowser();
-    await setupExcel("all-scene");
+    await setupExcel();
     // Todo: define custom functions here
     // await page.evaluate(async () => {
     // 	window.todo = () => {}
@@ -115,7 +115,7 @@ describe.only('should load scene works', () => {
           displayLog('success', 'Child apps fully loaded: ', `${result.loadedAppCount} of ${appCount}`);
         }
 
-        displayLog(playerMove.currentPosition !== firstPosition? 'success' : 'error', 'Should scene load works: ', 'Player avatar moved');
+        displayLog(playerMove.currentPosition !== firstPosition? 'success' : 'error', 'Should scene load works: ', 'Test player avatar movement');
 
         isSuccess = result.isSceneLoaded && result.loadedAppCount === appCount && errorLists.length === 0 && playerMove.currentPosition !== firstPosition;
 
