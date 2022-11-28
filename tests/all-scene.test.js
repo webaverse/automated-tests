@@ -33,8 +33,8 @@ describe.only('should load scene works', () => {
   test.each(sceneUrls) (
     'should scene load works %s',
     async sceneUrl => {
+      let isSuccess = false
       try {
-        let isSuccess = false
         //Todo: check timeout case
         if (recentTestPassed !== currntTest) {
           displayLog('fail', 'Scene loaded failed timeout: ', `${currntTest}`)
