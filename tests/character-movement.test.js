@@ -196,10 +196,10 @@ describe.only(
 
         const narutoRun = await page.evaluate(async () => {
           const avatar = globalWebaverse.playersManager.localPlayer.avatar;
-          const narutoRunTime = avatar.narutoRunTime;
+          const narutoRunAction = globalWebaverse.playersManager.localPlayer.hasAction("narutoRun");
           const narutoRunState = avatar.narutoRunState;
           return {
-            narutoRunTime,
+            narutoRunAction,
             narutoRunState,
           };
         });
@@ -207,10 +207,10 @@ describe.only(
         await page.waitForTimeout(5000);
 
         displayLog('step', 'should character movement: ', 'validation');
-        displayLog(narutoRun.narutoRunTime > 0.5? 'success' : 'error', 'should character movement: ', 'narutoRunTime > 0.5');
+        displayLog(narutoRun.narutoRunAction? 'success' : 'error', 'should character movement: ', 'narutoRunAction');
         displayLog(narutoRun.narutoRunState? 'success' : 'error', 'should character movement: ', 'narutoRunState');
  
-        const isSuccess = narutoRun.narutoRunTime > 0.5 && narutoRun.narutoRunState
+        const isSuccess = narutoRun.narutoRunAction && narutoRun.narutoRunState
         // expect(playerMove.isCorrectMove).toBeTruthy();
         displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'naruto run');
         expect(isSuccess).toBeTruthy();
@@ -234,13 +234,12 @@ describe.only(
           await page.waitForTimeout(100);
           const isJump = await page.evaluate(async lastPosition => {
             const avatar =
-              window.globalWebaverse.playersManager?.localPlayer?.avatar;
+              globalWebaverse.playersManager?.localPlayer?.avatar;
             const jumpState = avatar.jumpState;
-            const jumpTime = avatar.jumpTime;
+            const jumpAction = globalWebaverse.playersManager?.localPlayer?.hasAction("jump");
             const currentPosition = globalWebaverse.playersManager.localPlayer.position;
-            console.log(jumpTime, jumpState, lastPosition, currentPosition);
             return (
-              jumpTime > 0 &&
+              jumpAction &&
               jumpState &&
               currentPosition.y - lastPosition.y > 0
             );
@@ -277,11 +276,10 @@ describe.only(
           const isDoubleJump = await page.evaluate(async lastPosition => {
             const avatar = globalWebaverse.playersManager.localPlayer.avatar;
             const doubleJumpState = avatar.doubleJumpState;
-            const doubleJumpTime = avatar.doubleJumpTime;
+            const doubleJumpAction = globalWebaverse.playersManager.localPlayer.hasAction('doubleJump');
             const currentPosition = globalWebaverse.playersManager.localPlayer.position;
-            console.log(doubleJumpTime, doubleJumpState);
             return (
-              doubleJumpTime > 0 &&
+              doubleJumpAction &&
               doubleJumpState &&
               currentPosition.y - lastPosition.y > 0
             );
@@ -319,11 +317,11 @@ describe.only(
         const playerCrouch = await page.evaluate(async () => {
           const avatar = globalWebaverse.playersManager.localPlayer.avatar;
           const currentSpeed = avatar.velocity.length();
-          const crouchFactor = avatar.crouchFactor;
+          const crouchAction = globalWebaverse.playersManager.localPlayer.hasAction("crouch");
           const currentPosition = globalWebaverse.playersManager.localPlayer.position;
           return {
             currentSpeed,
-            crouchFactor,
+            crouchAction,
             currentPosition,
           };
         });
@@ -337,10 +335,10 @@ describe.only(
 
         displayLog('step', 'should character movement: ', 'validation');
         displayLog(playerCrouch.currentSpeed > 0? 'success' : 'error', 'should character movement: ', 'currentSpeed > 0');
-        displayLog(playerCrouch.crouchFactor > 0.5? 'success' : 'error', 'should character movement: ', 'crouchFactor > 0.5');
+        displayLog(playerCrouch.crouchAction? 'success' : 'error', 'should character movement: ', 'crouchAction');
         displayLog(playerCrouch.currentPosition !== lastPosition? 'success' : 'error', 'should character movement: ', 'moved');
         
-        const isSuccess = playerCrouch.currentSpeed > 0 && playerCrouch.crouchFactor > 0.5 && playerCrouch.currentPosition !== lastPosition
+        const isSuccess = playerCrouch.currentSpeed > 0 && playerCrouch.crouchAction && playerCrouch.currentPosition !== lastPosition
         displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'crouch');
         expect(isSuccess).toBeTruthy();
       },
@@ -358,9 +356,9 @@ describe.only(
         const playerFly = await page.evaluate(async () => {
           const avatar = globalWebaverse.playersManager.localPlayer.avatar;
           const flyState = avatar.flyState;
-          const flyTime = avatar.flyTime;
+          const flyAction = globalWebaverse.playersManager.localPlayer.hasAction("fly");
           return {
-            flyTime,
+            flyAction,
             flyState,
           };
         });
@@ -369,10 +367,10 @@ describe.only(
         await page.waitForTimeout(3000);
 
         displayLog('step', 'should character movement: ', 'validation');
-        displayLog(playerFly.flyTime > 0? 'success' : 'error', 'should character movement: ', 'flyTime > 0');
+        displayLog(playerFly.flyAction? 'success' : 'error', 'should character movement: ', 'flyAction');
         displayLog(playerFly.flyState? 'success' : 'error', 'should character movement: ', 'flyState');
  
-        const isSuccess = playerFly.flyTime > 0.5 && playerFly.flyState
+        const isSuccess = playerFly.flyAction && playerFly.flyState
         displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'fly');
         expect(isSuccess).toBeTruthy();
       },
@@ -388,19 +386,19 @@ describe.only(
         await page.waitForTimeout(2000);
         const playerDance = await page.evaluate(async () => {
           const avatar = globalWebaverse.playersManager.localPlayer.avatar;
-          const danceFactor = avatar.danceFactor;
+          const danceAction = globalWebaverse.playersManager.localPlayer.hasAction("dance");;
           return {
-            danceFactor,
+            danceAction,
           };
         });
         await page.keyboard.up('KeyV');
         await page.waitForTimeout(3000);
-        expect(playerDance.danceFactor).toBeTruthy();
+        expect(playerDance.danceAction).toBeTruthy();
 
         displayLog('step', 'should character movement: ', 'validation');
-        displayLog(playerDance.danceFactor? 'success' : 'error', 'should character movement: ', 'dance');
+        displayLog(playerDance.danceAction? 'success' : 'error', 'should character movement: ', 'dance');
  
-        const isSuccess = playerDance.danceFactor
+        const isSuccess = playerDance.danceAction
         displayLog(isSuccess ? 'passed' : 'fail', 'should character movement: ', 'dance');
         expect(isSuccess).toBeTruthy();
       },
