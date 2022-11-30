@@ -11,14 +11,17 @@ const height = 400;
 let browsers = [];
 let pages = [];
 let errorLists = []
-let totalTimeout = 30 * 60 * 1000
+let totalTimeout = 5 * 60 * 1000
+let retryCount = 0
+let isReConnectionNeeded = false
 
 const isdebug = true;
 
 let csvWriter = null
 let csvRecords = []
+let isWriteCSV = true
+
 let currentScene
-const testFilePath = './test.csv'
 
 const printLog = (text, error) => {
   if (isdebug) {
@@ -29,6 +32,7 @@ const printLog = (text, error) => {
 };
 
 const setupExcel = async () => {
+  const testFilePath = `test-${Math.floor(Date.now() / 1000)}.csv`
   try {
     if (fs.existsSync(testFilePath)) {
       fs.unlinkSync(testFilePath);
@@ -59,7 +63,7 @@ const setCurrentScene = async (str) => {
 const saveExcel = async (str) => {
   try {
     if (currentScene != str) return
-    await csvWriter.writeRecords(csvRecords)
+    if (isWriteCSV) await csvWriter.writeRecords(csvRecords)
     csvRecords = []
   } catch (error) {
     console.error(error)
@@ -230,51 +234,84 @@ const getCurrentPage = (playerIndex = 0) => {
   return pages[playerIndex];
 };
 
+
 const navigate = async (url, playerIndex = 0) => {
-  // const browser = browsers[playerIndex]
-  const page = pages[playerIndex]
-  // if (!browser) {
-  //   throw Error('Cannot navigate without a browser!');
-  // }
-  // const context = browser.defaultBrowserContext();
+  try {
+    // const browser = browsers[playerIndex]
+    const page = pages[playerIndex]
+    // if (!browser) {
+    //   throw Error('Cannot navigate without a browser!');
+    // }
+    // const context = browser.defaultBrowserContext();
 
-  // const parsedUrl = new Url(url);
-  // context.overridePermissions(url, ['microphone', 'camera']);
+    // const parsedUrl = new Url(url);
+    // context.overridePermissions(url, ['microphone', 'camera']);
 
-  displayLog('action', `Going to url: ${url}`);
+    displayLog('action', `Going to url: ${url}`);
 
-  await page.goto(url, { waitUntil: 'load', timeout: totalTimeout });
-  // printLog('Complete to ' + url);
+    await page.goto(url, { waitUntil: 'load', timeout: totalTimeout });
+    // printLog('Complete to ' + url);
 
-  // const granted = await page.evaluate(async () => {
-  // 	// @ts-ignore
-  // 	return (await navigator.permissions.query({ name: 'camera' })).state
-  // })
-  // printLog('Granted:', granted
+    // const granted = await page.evaluate(async () => {
+    // 	// @ts-ignore
+    // 	return (await navigator.permissions.query({ name: 'camera' })).state
+    // })
+    // printLog('Granted:', granted)
+    return true
+  } catch (error) {
+    console.error(error)
+    if (!isReConnectionNeeded) {
+      isReConnectionNeeded = true
+      retryCount = 0
+      await reConnection(url, playerIndex)
+    }
+    return false
+  }
 };
+
+const reConnection = async (url, playerIndex) => {
+  while(isReConnectionNeeded == true && retryCount < 10)
+  {
+    const isConnected = await navigate(url, playerIndex);
+    retryCount += 1;
+    isReConnectionNeeded = !isConnected
+    if (!isConnected) {
+      // Wait a few seconds, also a good idea to swap proxy here*
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  }
+  return !isReConnectionNeeded
+}
 
 const enterScene = async (url, playerIndex = 0) => {
   await navigate(url, playerIndex);
   const page = pages[playerIndex]
   await defineFunctions(page);
-  const isSceneLoaded = await page.evaluate(async (totalTimeout) => {
-    // @ts-ignore
-    try {
-      if (!window?.globalWebaverse) return;
-      await window.globalWebaverse.webaverse?.waitForLoad();
-      await window.globalWebaverse.universe?.isSceneLoaded();
-      await window.globalWebaverse.universe?.waitForSceneLoaded();
-      return await window.waitForUntil(() => {
-        const avatar = window.globalWebaverse.playersManager?.localPlayer?.avatar;
-        return (avatar?.model && avatar?.model?.visible) || (avatar?.crunchedModel && avatar?.crunchedModel?.visible);
-      }, totalTimeout);
-    } catch (error) {
-      console.error('error loading ', error);
-      return false;
+  if (isReConnectionNeeded) {
+    isReConnectionNeeded = false
+    await throwErrors('Cannot load the current scene!', false);
+  } else {
+    const isSceneLoaded = await page.evaluate(async (totalTimeout) => {
+      // @ts-ignore
+      try {
+        await window.waitForUntil(() => {
+          return window?.globalWebaverse
+        }, totalTimeout / 2);
+        await window.globalWebaverse.webaverse?.waitForLoad();
+        await window.globalWebaverse.universe?.isSceneLoaded();
+        await window.globalWebaverse.universe?.waitForSceneLoaded();
+        return await window.waitForUntil(() => {
+          const avatar = window.globalWebaverse.playersManager?.localPlayer?.avatar;
+          return (avatar?.model && avatar?.model?.visible) || (avatar?.crunchedModel && avatar?.crunchedModel?.visible);
+        }, totalTimeout);
+      } catch (error) {
+        console.error('error loading ', error);
+        return false;
+      }
+    }, totalTimeout);
+    if (!isSceneLoaded) {
+      await throwErrors('Cannot load the current scene!', false);
     }
-  }, totalTimeout);
-  if (!isSceneLoaded) {
-    await throwErrors('Cannot load the current scene!', true);
   }
   displayLog('action', `Scene Loaded url: ${url}`);
 };

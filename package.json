@@ -1,7 +1,7 @@
 {
   "name": "test e2e",
   "scripts": {
-    "test-e2e": "jest -i --colors"
+    "test-e2e": "jest -i"
   },
   "dependencies": {
     "child_process": "^1.0.2",

@@ -118,18 +118,18 @@ describe.only('should load scene works', () => {
         displayLog(playerMove.currentPosition !== firstPosition? 'success' : 'error', 'Should scene load works: ', 'Test player avatar movement');
 
         isSuccess = result.isSceneLoaded && result.loadedAppCount === appCount && errorLists.length === 0 && playerMove.currentPosition !== firstPosition;
-
-        if (isSuccess) {
-          displayLog('passed', 'Scene loaded successfully: ', `${sceneUrl}`);
-        } else {
-          displayLog('fail', 'Scene loaded failed: ', `${sceneUrl}`);
-        }
       } catch (error) {
         console.error(error)
       }
 
       saveExcel(sceneUrl)
       recentTestPassed = sceneUrl
+      
+      if (isSuccess) {
+        displayLog('passed', 'Scene loaded successfully: ', `${sceneUrl}`);
+      } else {
+        displayLog('fail', 'Scene loaded failed: ', `${sceneUrl}`);
+      }
       expect(isSuccess).toBeTruthy();
     },
     totalTimeout,
