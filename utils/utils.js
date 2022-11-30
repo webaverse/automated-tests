@@ -199,7 +199,7 @@ const launchBrowser = async (isMulti) => {
   for (let i = 0; i < browserCount; i++) {
     const browser = await puppeteer.launch({
       // headless: !isdebug,
-      headless: false,
+      headless: true,
       args: [
         '--no-sandbox',
         // '--use-gl=egl',

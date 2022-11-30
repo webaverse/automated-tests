@@ -124,13 +124,15 @@ describe.only('should load scene works', () => {
 
       saveExcel(sceneUrl)
       recentTestPassed = sceneUrl
-      
-      if (isSuccess) {
-        displayLog('passed', 'Scene loaded successfully: ', `${sceneUrl}`);
-      } else {
-        displayLog('fail', 'Scene loaded failed: ', `${sceneUrl}`);
+
+      if (currntTest == sceneUrl) {
+        if (isSuccess) {
+          displayLog('passed', 'Scene loaded successfully: ', `${sceneUrl}`);
+        } else {
+          displayLog('fail', 'Scene loaded failed: ', `${sceneUrl}`);
+        }
+        expect(isSuccess).toBeTruthy();
       }
-      expect(isSuccess).toBeTruthy();
     },
     totalTimeout,
   );
